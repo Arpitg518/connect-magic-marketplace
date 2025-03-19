@@ -18,7 +18,7 @@ const testimonials = [
     name: 'Michael Thompson',
     role: 'Marketing Director, Eco Essentials',
     avatar: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?ixlib=rb-4.0.3&auto=format&fit=crop&w=80&h=80&q=80',
-    quote: 'As a sustainable lifestyle brand, finding influencers who genuinely care about our mission was crucial. ConnectMagic's verification system ensured we only connected with authentic voices who resonated with our audience.',
+    quote: "As a sustainable lifestyle brand, finding influencers who genuinely care about our mission was crucial. ConnectMagic's verification system ensured we only connected with authentic voices who resonated with our audience.",
     rating: 5
   },
   {
@@ -34,7 +34,7 @@ const testimonials = [
     name: 'Daniel Park',
     role: 'CEO, TechNow',
     avatar: 'https://images.unsplash.com/photo-1618077360395-f3068be8e001?ixlib=rb-4.0.3&auto=format&fit=crop&w=80&h=80&q=80',
-    quote: 'The ROI we've seen from campaigns managed through ConnectMagic far exceeds our previous influencer marketing efforts. The analytics dashboard gives us real-time insights that help us optimize our strategy continuously.',
+    quote: "The ROI we've seen from campaigns managed through ConnectMagic far exceeds our previous influencer marketing efforts. The analytics dashboard gives us real-time insights that help us optimize our strategy continuously.",
     rating: 5
   },
 ];
