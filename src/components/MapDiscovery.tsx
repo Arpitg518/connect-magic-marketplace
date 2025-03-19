@@ -1,133 +1,117 @@
 
-import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
-import { Check, Heart, X, MapPin, MessageCircle } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useRef } from 'react';
 import { indianInfluencers } from '@/data/indianInfluencers';
 
-interface Coordinates {
-  lat: number;
-  lng: number;
-}
-
-interface MapProps {
+interface MapDiscoveryProps {
   onCitySelect: (city: string) => void;
 }
 
-const INDIA_CENTER = { lat: 22.5937, lng: 78.9629 };
-const INDIAN_CITIES = [
-  { name: 'Mumbai', coordinates: { lat: 19.0760, lng: 72.8777 } },
-  { name: 'Delhi', coordinates: { lat: 28.6139, lng: 77.2090 } },
-  { name: 'Bangalore', coordinates: { lat: 12.9716, lng: 77.5946 } },
-  { name: 'Hyderabad', coordinates: { lat: 17.3850, lng: 78.4867 } },
-  { name: 'Chennai', coordinates: { lat: 13.0827, lng: 80.2707 } },
-  { name: 'Kolkata', coordinates: { lat: 22.5726, lng: 88.3639 } },
-];
-
-const MapDiscovery: React.FC<MapProps> = ({ onCitySelect }) => {
+const MapDiscovery: React.FC<MapDiscoveryProps> = ({ onCitySelect }) => {
   const mapRef = useRef<HTMLDivElement>(null);
-  const [selectedCity, setSelectedCity] = useState<string | null>(null);
-  const [map, setMap] = useState<any>(null);
-  const [markers, setMarkers] = useState<any[]>([]);
+  const mapInstanceRef = useRef<any>(null);
+  const markersRef = useRef<any[]>([]);
 
-  // Initialize map
-  useEffect(() => {
-    if (!mapRef.current) return;
-
-    const apiKey = "AlzaSyILn4tQ43sZeGmgDIyzbl9KLF7R8i-O2Tb";
-    const mapScript = document.createElement('script');
-    mapScript.src = `http://maps.gomaps.pro/maps/api/js?key=${apiKey}&libraries=places&callback=initMap`;
-    mapScript.async = true;
-    mapScript.defer = true;
+  // Group influencers by city to avoid duplicate markers
+  const citiesWithInfluencers = React.useMemo(() => {
+    const cities: Record<string, { coordinates: { lat: number, lng: number }, count: number }> = {};
     
-    window.initMap = () => {
-      const newMap = new window.google.maps.Map(mapRef.current!, {
-        center: INDIA_CENTER,
-        zoom: 5,
-        styles: [
-          {
-            "featureType": "all",
-            "elementType": "geometry",
-            "stylers": [{"color": "#f5f5f5"}]
-          },
-          {
-            "featureType": "water",
-            "elementType": "geometry",
-            "stylers": [{"color": "#c9c9c9"}]
-          },
-          {
-            "featureType": "water",
-            "elementType": "labels.text.fill",
-            "stylers": [{"color": "#9e9e9e"}]
-          },
-          {
-            "featureType": "road",
-            "elementType": "geometry",
-            "stylers": [{"color": "#ffffff"}]
-          }
-        ]
-      });
-      setMap(newMap);
+    indianInfluencers.forEach(influencer => {
+      if (cities[influencer.city]) {
+        cities[influencer.city].count += 1;
+      } else {
+        cities[influencer.city] = {
+          coordinates: influencer.coordinates,
+          count: 1
+        };
+      }
+    });
+    
+    return cities;
+  }, []);
 
-      // Add city markers
-      const cityMarkers = INDIAN_CITIES.map(city => {
-        const marker = new window.google.maps.Marker({
-          position: city.coordinates,
-          map: newMap,
-          title: city.name,
-          icon: {
-            path: window.google.maps.SymbolPath.CIRCLE,
-            scale: 10,
-            fillColor: "#9b87f5",
-            fillOpacity: 0.8,
-            strokeWeight: 2,
-            strokeColor: "#ffffff"
-          }
+  useEffect(() => {
+    const initializeMap = () => {
+      if (!mapRef.current) return;
+      
+      try {
+        // Use the free map provider with correct API key
+        const mapOptions = {
+          center: { lat: 20.5937, lng: 78.9629 }, // Center of India
+          zoom: 5,
+          mapTypeControl: false,
+          streetViewControl: false,
+          fullscreenControl: false,
+        };
+        
+        // Initialize the map
+        mapInstanceRef.current = new window.google.maps.Map(mapRef.current, mapOptions);
+        
+        // Add markers for each city with influencers
+        Object.entries(citiesWithInfluencers).forEach(([city, data]) => {
+          const marker = new window.google.maps.Marker({
+            position: data.coordinates,
+            map: mapInstanceRef.current,
+            title: `${city} (${data.count} influencers)`,
+            animation: window.google.maps.Animation.DROP,
+          });
+          
+          // Add info window for each marker
+          const infoWindow = new window.google.maps.InfoWindow({
+            content: `
+              <div class="p-2">
+                <h3 class="font-semibold">${city}</h3>
+                <p>${data.count} influencers available</p>
+                <button id="view-${city}" class="text-xs text-primary font-medium">View Influencers</button>
+              </div>
+            `
+          });
+          
+          marker.addListener('click', () => {
+            infoWindow.open(mapInstanceRef.current, marker);
+          });
+          
+          // Add event listener for the button inside info window
+          window.google.maps.event.addListener(infoWindow, 'domready', () => {
+            document.getElementById(`view-${city}`)?.addEventListener('click', () => {
+              onCitySelect(city);
+              infoWindow.close();
+            });
+          });
+          
+          markersRef.current.push(marker);
         });
-
-        // Add click event to markers
-        marker.addListener('click', () => {
-          setSelectedCity(city.name);
-          onCitySelect(city.name);
-          newMap.setCenter(city.coordinates);
-          newMap.setZoom(10);
-        });
-
-        return marker;
-      });
-
-      setMarkers(cityMarkers);
+      } catch (error) {
+        console.error('Error initializing map:', error);
+      }
     };
 
-    document.head.appendChild(mapScript);
-
+    // Load Google Maps API script
+    if (!window.google) {
+      const script = document.createElement('script');
+      // Using the working API key and provider
+      script.src = 'https://maps.gomaps.pro/map/lib/api?key=AlzaSyILn4tQ43sZeGmgDIyzbl9KLF7R8i-O2Tb&callback=initMap';
+      script.async = true;
+      script.defer = true;
+      
+      window.initMap = initializeMap;
+      
+      document.head.appendChild(script);
+    } else {
+      initializeMap();
+    }
+    
+    // Cleanup
     return () => {
-      // Clean up
-      document.head.removeChild(mapScript);
-      window.initMap = undefined;
-      markers.forEach(marker => marker.setMap(null));
+      markersRef.current.forEach(marker => {
+        if (marker) marker.setMap(null);
+      });
+      markersRef.current = [];
     };
-  }, [onCitySelect]);
+  }, [citiesWithInfluencers, onCitySelect]);
 
   return (
-    <div className="relative w-full h-[500px] rounded-xl overflow-hidden shadow-card border border-border/30 mb-10">
-      <div ref={mapRef} className="absolute inset-0" />
-      
-      {/* Map overlay info */}
-      <div className="absolute top-4 left-4 z-10 bg-white/90 backdrop-blur-sm p-4 rounded-lg shadow-lg">
-        <h3 className="text-lg font-medium mb-2 flex items-center">
-          <MapPin size={18} className="mr-2 text-primary" />
-          Find Influencers by Location
-        </h3>
-        <p className="text-sm text-foreground/70">
-          Click on a city marker to discover influencers in that location
-        </p>
-        {selectedCity && (
-          <div className="mt-2 py-1 px-2 bg-primary/10 text-primary rounded-full text-sm font-medium">
-            Currently viewing: {selectedCity}
-          </div>
-        )}
-      </div>
+    <div className="w-full h-80 rounded-lg overflow-hidden shadow-md mb-8">
+      <div ref={mapRef} className="w-full h-full"></div>
     </div>
   );
 };
