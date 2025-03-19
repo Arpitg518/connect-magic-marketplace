@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
@@ -6,7 +5,6 @@ import {
   Instagram, 
   Twitter, 
   Youtube, 
-  TikTok, 
   CheckCircle, 
   MapPin, 
   Users, 
@@ -24,6 +22,26 @@ import {
 
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+
+// Custom TikTok icon since it's not available in lucide-react
+const TikTokIcon = () => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    width="20" 
+    height="20" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+  >
+    <path d="M9 12a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/>
+    <path d="M15 8a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
+    <path d="M15 8v8a4 4 0 0 1-4 4"/>
+    <path d="M15 8h-4"/>
+  </svg>
+);
 
 // Mock data for an influencer profile
 const mockInfluencer = {
@@ -57,7 +75,7 @@ const mockInfluencer = {
       followers: '850K',
       engagement: 6.2,
       link: 'https://tiktok.com/@sophiastyle',
-      icon: <TikTok size={20} />
+      icon: <TikTokIcon />
     },
     {
       platform: 'YouTube',
