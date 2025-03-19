@@ -23,35 +23,78 @@ export const matchInfluencerWithBusiness = async (
     const businessLookingFor = business.lookingFor || [];
     
     let matchCount = 0;
+    let matchDetails: string[] = [];
+    
     influencerTags.forEach(tag => {
-      if (businessLookingFor.some(interest => 
-        interest.toLowerCase().includes(tag) || tag.includes(interest.toLowerCase())
-      )) {
+      const matchedInterests = businessLookingFor.filter(interest => 
+        interest.toLowerCase().includes(tag.toLowerCase()) || 
+        tag.toLowerCase().includes(interest.toLowerCase())
+      );
+      
+      if (matchedInterests.length > 0) {
         matchCount++;
+        matchDetails.push(`${tag} matches with ${matchedInterests.join(', ')}`);
       }
     });
     
+    // Check if they're in the same city for local partnership bonus
+    const sameCity = influencer.city === business.city;
+    if (sameCity) {
+      matchCount += 0.5;
+      matchDetails.push(`Both are based in ${influencer.city}`);
+    }
+    
+    // Check if influencer category aligns with business category
+    const categoryMatch = business.category.toLowerCase().includes(influencer.category.toLowerCase()) ||
+                         influencer.category.toLowerCase().includes(business.category.toLowerCase());
+    if (categoryMatch) {
+      matchCount += 1;
+      matchDetails.push(`Influencer category (${influencer.category}) aligns with business category (${business.category})`);
+    }
+    
     // Calculate match percentage
-    const maxPossibleMatches = Math.max(influencerTags.length, businessLookingFor.length);
+    const maxPossibleMatches = Math.max(influencerTags.length, businessLookingFor.length) + 1.5; // +1.5 for city and category
     const matchPercentage = Math.round((matchCount / maxPossibleMatches) * 100);
     
-    // Add some random variation to make it interesting
-    const finalScore = Math.min(100, Math.max(30, matchPercentage + Math.floor(Math.random() * 30)));
+    // Add some random variation to make it interesting, but ensure it stays reasonable
+    const finalScore = Math.min(98, Math.max(30, matchPercentage + Math.floor(Math.random() * 20)));
     
-    // Generate mock reasoning
+    // Generate reasoning based on the actual matches
     const reasoning = [
       `${influencer.name}'s focus on ${influencer.category} aligns with ${business.name}'s target market.`,
       `${influencer.name}'s audience demographic matches ${business.name}'s target customers.`,
-      `Both are based in the same region, enabling local marketing opportunities.`,
     ];
     
-    // Generate mock collaboration suggestions
+    if (sameCity) {
+      reasoning.push(`Both are based in ${influencer.city}, enabling local marketing opportunities.`);
+    }
+    
+    if (matchDetails.length > 0) {
+      reasoning.push(`Common interests include: ${influencerTags.filter(tag => 
+        businessLookingFor.some(interest => 
+          interest.toLowerCase().includes(tag.toLowerCase()) || 
+          tag.toLowerCase().includes(interest.toLowerCase())
+        )
+      ).join(', ')}`);
+    }
+    
+    // Generate collaboration suggestions based on the influencer's platform
     const collaborations = [
       `Sponsored content featuring ${business.name}'s products in ${influencer.name}'s typical style.`,
-      `Instagram takeover of ${business.name}'s account by ${influencer.name} for a day.`,
+      `${influencer.platform} takeover of ${business.name}'s account by ${influencer.name} for a day.`,
       `Joint giveaway contest to increase engagement for both parties.`,
-      `Product development collaboration for a limited edition item.`,
     ];
+    
+    // Add more specific collaboration ideas based on the influencer's category
+    if (influencer.category.includes('Fashion') || influencer.category.includes('Beauty')) {
+      collaborations.push(`Product review series highlighting ${business.name}'s newest offerings.`);
+    } else if (influencer.category.includes('Tech')) {
+      collaborations.push(`Detailed product demonstration and review video for ${business.name}'s products.`);
+    } else if (influencer.category.includes('Fitness')) {
+      collaborations.push(`Fitness challenge sponsored by ${business.name} with branded merchandise.`);
+    } else if (influencer.category.includes('Travel')) {
+      collaborations.push(`Location-based content feature at ${business.name}'s stores or venues.`);
+    }
     
     return {
       matchScore: finalScore,
@@ -60,6 +103,6 @@ export const matchInfluencerWithBusiness = async (
     };
   } catch (error) {
     console.error('Error in matchInfluencerWithBusiness:', error);
-    throw error;
+    throw new Error('Failed to generate matchmaking results. Please try again.');
   }
 };

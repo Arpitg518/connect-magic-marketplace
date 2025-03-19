@@ -2,7 +2,7 @@
 import { Instagram, Youtube } from 'lucide-react';
 import React from 'react';
 
-// Custom TikTok icon
+// Custom TikTok icon as a proper React component
 export const TikTokIcon: React.FC = () => {
   return (
     <svg 
