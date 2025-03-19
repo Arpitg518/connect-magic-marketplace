@@ -1,137 +1,162 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Instagram, Youtube, ArrowRight, Check } from 'lucide-react';
+import { ArrowRight, Search, MapPin, Filter } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-// Mock data for influencers
-const influencers = [
-  {
-    id: 1,
-    name: 'Sophia Reynolds',
-    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
-    category: 'Lifestyle & Travel',
-    followers: '1.2M',
-    platform: 'Instagram',
-    platformIcon: <Instagram size={16} />,
-    verified: true,
-  },
-  {
-    id: 2,
-    name: 'Marcus Chen',
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
-    category: 'Tech & Gaming',
-    followers: '845K',
-    platform: 'YouTube',
-    platformIcon: <Youtube size={16} />,
-    verified: true,
-  },
-  {
-    id: 3,
-    name: 'Zoe Martinez',
-    image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
-    category: 'Fashion & Beauty',
-    followers: '2.3M',
-    platform: 'TikTok',
-    platformIcon: <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 12a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/><path d="M15 8a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><path d="M15 8v8a4 4 0 0 1-4 4"/><path d="M15 8h-4"/></svg>,
-    verified: true,
-  }
-];
+import { indianInfluencers } from '@/data/indianInfluencers';
+import InfluencerCard from './InfluencerCard';
+import MapDiscovery from './MapDiscovery';
+import { Input } from './ui/input';
+import { Button } from './ui/button';
 
 const InfluencerShowcase: React.FC = () => {
-  const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+  const [selectedCity, setSelectedCity] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isMapVisible, setIsMapVisible] = useState(false);
+
+  // Filter influencers based on selected city and search query
+  const filteredInfluencers = indianInfluencers.filter(influencer => {
+    const matchesCity = selectedCity ? influencer.city === selectedCity : true;
+    const matchesSearch = searchQuery 
+      ? influencer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        influencer.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (influencer.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())) ?? false)
+      : true;
+    
+    return matchesCity && matchesSearch;
+  });
+
+  const handleCitySelection = useCallback((city: string) => {
+    setSelectedCity(city);
+  }, []);
+
+  const clearFilters = () => {
+    setSelectedCity(null);
+    setSearchQuery('');
+  };
 
   return (
-    <section className="py-20 md:py-28">
+    <section className="py-20 md:py-28 bg-gradient-to-b from-purple-50/50 to-white">
       <div className="container mx-auto px-4 md:px-6">
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 md:mb-16">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="max-w-2xl mb-6 md:mb-0"
-          >
-            <span className="bg-primary/10 text-primary text-sm font-medium py-1 px-3 rounded-full mb-4 inline-block">
-              Discover Creators
-            </span>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Connect with Top Influencers
-            </h2>
-            <p className="text-foreground/70">
-              Our platform hosts thousands of verified influencers across all niches and social media platforms.
-              Find the perfect partners for your brand's next campaign.
-            </p>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <Link 
-              to="/influencers" 
-              className="flex items-center text-primary font-medium group"
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="max-w-2xl mb-12 md:mb-16"
+        >
+          <span className="bg-primary/10 text-primary text-sm font-medium py-1 px-3 rounded-full mb-4 inline-block">
+            Discover Creators
+          </span>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            Connect with Top Indian Influencers
+          </h2>
+          <p className="text-foreground/70">
+            Our platform hosts thousands of verified Indian influencers across all niches and social media platforms.
+            Find the perfect partners for your brand's next campaign.
+          </p>
+        </motion.div>
+
+        {/* Search & Filters */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mb-8"
+        >
+          <div className="flex flex-col md:flex-row gap-4 mb-4">
+            <div className="relative flex-grow">
+              <Input
+                type="text"
+                placeholder="Search by name, category, or tags..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 bg-white"
+              />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
+            </div>
+            
+            <Button
+              onClick={() => setIsMapVisible(!isMapVisible)}
+              variant="outline"
+              className="flex items-center gap-2"
             >
-              Browse all influencers
-              <ArrowRight size={18} className="ml-2 transition-transform group-hover:translate-x-1" />
-            </Link>
+              <MapPin size={18} />
+              {isMapVisible ? 'Hide Map' : 'Show Map'}
+            </Button>
+            
+            {selectedCity && (
+              <Button
+                onClick={clearFilters}
+                variant="ghost"
+                className="flex items-center gap-2"
+              >
+                Clear Filters
+              </Button>
+            )}
+          </div>
+          
+          {selectedCity && (
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <MapPin size={16} className="text-primary" />
+              <span>Showing influencers in {selectedCity}</span>
+            </div>
+          )}
+        </motion.div>
+        
+        {/* Map Discovery */}
+        {isMapVisible && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <MapDiscovery onCitySelect={handleCitySelection} />
           </motion.div>
-        </div>
+        )}
 
         {/* Influencer Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {influencers.map((influencer, index) => (
-            <motion.div
-              key={influencer.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              onMouseEnter={() => setHoveredCard(influencer.id)}
-              onMouseLeave={() => setHoveredCard(null)}
-              className="bg-white rounded-xl overflow-hidden shadow-card border border-border/30 transition-all duration-300 hover:shadow-prominent"
-            >
-              <div className="relative aspect-[3/2] overflow-hidden">
-                <img 
-                  src={influencer.image} 
-                  alt={influencer.name}
-                  className="w-full h-full object-cover transition-transform duration-500"
-                  style={{ 
-                    transform: hoveredCard === influencer.id ? 'scale(1.05)' : 'scale(1)'
-                  }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-                <div className="absolute bottom-0 left-0 right-0 p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="bg-black/40 backdrop-blur-sm text-white text-xs font-medium py-1 px-2 rounded-full flex items-center">
-                      {influencer.platformIcon}
-                      <span className="ml-1">{influencer.followers}</span>
-                    </span>
-                    {influencer.verified && (
-                      <span className="bg-primary/10 backdrop-blur-sm text-white text-xs font-medium py-1 px-2 rounded-full flex items-center">
-                        <Check size={12} className="mr-1" />
-                        Verified
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-              <div className="p-5">
-                <h3 className="text-lg font-medium mb-1">{influencer.name}</h3>
-                <p className="text-sm text-foreground/70 mb-4">{influencer.category}</p>
-                <Link
-                  to={`/influencer/${influencer.id}`}
-                  className="text-sm font-medium text-primary flex items-center hover:underline"
-                >
-                  View Profile
-                  <ArrowRight size={14} className="ml-1" />
-                </Link>
-              </div>
-            </motion.div>
-          ))}
+          {filteredInfluencers.length > 0 ? (
+            filteredInfluencers.map((influencer, index) => (
+              <InfluencerCard
+                key={influencer.id}
+                {...influencer}
+              />
+            ))
+          ) : (
+            <div className="col-span-full text-center py-12">
+              <p className="text-lg text-foreground/70">No influencers found matching your criteria</p>
+              <Button 
+                onClick={clearFilters}
+                variant="outline" 
+                className="mt-4"
+              >
+                Clear Filters
+              </Button>
+            </div>
+          )}
         </div>
+        
+        {/* View All Link */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="text-center mt-12"
+        >
+          <Link 
+            to="/influencers" 
+            className="inline-flex items-center text-primary font-medium px-6 py-3 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors"
+          >
+            Browse all influencers
+            <ArrowRight size={18} className="ml-2 transition-transform group-hover:translate-x-1" />
+          </Link>
+        </motion.div>
       </div>
     </section>
   );

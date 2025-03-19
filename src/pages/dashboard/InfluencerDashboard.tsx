@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { 
@@ -17,11 +17,36 @@ import {
   TrendingUp,
   Instagram,
   Youtube,
-  Twitter
+  Twitter,
+  MapPin,
+  Sparkles
 } from 'lucide-react';
 
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import MapDiscovery from '@/components/MapDiscovery';
+import AIMatchmaking from '@/components/AIMatchmaking';
+import { indianBusinesses } from '@/data/indianInfluencers';
+
+// Custom TikTok icon since it's not available in lucide-react
+const TikTokIcon = () => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    width="20" 
+    height="20" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+  >
+    <path d="M9 12a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/>
+    <path d="M15 8a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
+    <path d="M15 8v8a4 4 0 0 1-4 4"/>
+    <path d="M15 8h-4"/>
+  </svg>
+);
 
 // Mock data for the influencer dashboard
 const mockData = {
@@ -36,28 +61,28 @@ const mockData = {
   campaignOpportunities: [
     {
       id: 1,
-      company: 'Eco Lifestyle',
-      logo: 'https://images.unsplash.com/photo-1611162616475-46b635cb6868?ixlib=rb-4.0.3&auto=format&fit=crop&w=60&h=60&q=80',
-      title: 'Sustainable Product Review',
-      budget: '1,500 - 2,000',
+      company: 'Nykaa',
+      logo: 'https://images.unsplash.com/photo-1598257006626-48b0c252070d?ixlib=rb-4.0.3&auto=format&fit=crop&w=60&h=60&q=80',
+      title: 'Beauty Products Review Series',
+      budget: '₹150,000 - ₹250,000',
       matchScore: 95,
       dueDate: '2 weeks'
     },
     {
       id: 2,
-      company: 'FitTech',
-      logo: 'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-4.0.3&auto=format&fit=crop&w=60&h=60&q=80',
-      title: 'Fitness App Promotion',
-      budget: '2,000 - 3,000',
+      company: 'Boat Lifestyle',
+      logo: 'https://images.unsplash.com/photo-1511300636408-a63a89df3482?ixlib=rb-4.0.3&auto=format&fit=crop&w=60&h=60&q=80',
+      title: 'Audio Product Launch Campaign',
+      budget: '₹200,000 - ₹300,000',
       matchScore: 89,
       dueDate: '3 weeks'
     },
     {
       id: 3,
-      company: 'TravelNow',
-      logo: 'https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?ixlib=rb-4.0.3&auto=format&fit=crop&w=60&h=60&q=80',
-      title: 'Travel Destination Feature',
-      budget: '3,500 - 4,500',
+      company: 'FabIndia',
+      logo: 'https://images.unsplash.com/photo-1516762689617-e1cffcef479d?ixlib=rb-4.0.3&auto=format&fit=crop&w=60&h=60&q=80',
+      title: 'Sustainable Fashion Collection',
+      budget: '₹120,000 - ₹180,000',
       matchScore: 82,
       dueDate: '1 month'
     }
@@ -65,18 +90,18 @@ const mockData = {
   activeCampaigns: [
     {
       id: 101,
-      company: 'Lumina Beauty',
-      logo: 'https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?ixlib=rb-4.0.3&auto=format&fit=crop&w=60&h=60&q=80',
-      title: 'Skincare Collection Review',
+      company: 'Mamaearth',
+      logo: 'https://images.unsplash.com/photo-1526947425960-945c6e72858f?ixlib=rb-4.0.3&auto=format&fit=crop&w=60&h=60&q=80',
+      title: 'Natural Skincare Series',
       progress: 65,
       dueDate: 'Jun 28, 2023',
       status: 'In Progress'
     },
     {
       id: 102,
-      company: 'Green Kitchen',
-      logo: 'https://images.unsplash.com/photo-1521572008054-962cefc90ce7?ixlib=rb-4.0.3&auto=format&fit=crop&w=60&h=60&q=80',
-      title: 'Cookware Demo Series',
+      company: 'Urban Company',
+      logo: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?ixlib=rb-4.0.3&auto=format&fit=crop&w=60&h=60&q=80',
+      title: 'Home Services Promotion',
       progress: 30,
       dueDate: 'Jul 15, 2023',
       status: 'In Progress'
@@ -90,13 +115,21 @@ const mockData = {
 };
 
 const InfluencerDashboard: React.FC = () => {
+  const [selectedCity, setSelectedCity] = useState<string | null>(null);
+  const [showMap, setShowMap] = useState(false);
+  
   // Scroll to top on page load
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
+  const handleCitySelection = (city: string) => {
+    setSelectedCity(city);
+    setShowMap(false);
+  };
+
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-purple-50/50 to-white">
       <Header />
       
       <main className="flex-grow pt-28 pb-16">
@@ -108,7 +141,7 @@ const InfluencerDashboard: React.FC = () => {
             transition={{ duration: 0.5 }}
             className="mb-8"
           >
-            <h1 className="text-3xl font-bold mb-2">Welcome back, Sophia</h1>
+            <h1 className="text-3xl font-bold mb-2">Welcome back, Komal</h1>
             <p className="text-foreground/70">Here's what's happening with your creator account today.</p>
           </motion.div>
           
@@ -170,7 +203,7 @@ const InfluencerDashboard: React.FC = () => {
               </div>
               <h3 className="text-lg font-medium mb-1">Earnings</h3>
               <div className="flex justify-between items-end">
-                <p className="text-2xl font-bold">${(mockData.earnings.thisMonth).toLocaleString()}</p>
+                <p className="text-2xl font-bold">₹{(mockData.earnings.thisMonth).toLocaleString()}</p>
                 <Link to="/earnings" className="text-sm text-green-600 flex items-center">
                   <span>View all</span>
                   <ChevronRight size={16} />
@@ -206,6 +239,53 @@ const InfluencerDashboard: React.FC = () => {
                 </Link>
               </div>
             </div>
+          </motion.div>
+
+          {/* Location-based Discovery */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="mb-8"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <MapPin size={20} className="text-primary" />
+                <h2 className="text-xl font-semibold">Location-based Discovery</h2>
+              </div>
+              <button 
+                onClick={() => setShowMap(!showMap)}
+                className="text-sm text-primary flex items-center hover:underline"
+              >
+                {showMap ? 'Hide Map' : 'Show Map'}
+                <ChevronRight size={16} />
+              </button>
+            </div>
+            
+            {showMap && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className="mb-6"
+              >
+                <MapDiscovery onCitySelect={handleCitySelection} />
+              </motion.div>
+            )}
+            
+            {selectedCity && (
+              <div className="flex items-center gap-2 bg-primary/10 py-2 px-4 rounded-lg text-primary mb-4">
+                <MapPin size={16} />
+                <span className="font-medium">Current location filter: {selectedCity}</span>
+                <button 
+                  onClick={() => setSelectedCity(null)}
+                  className="ml-auto text-xs bg-white rounded-full px-2 py-0.5"
+                >
+                  Clear
+                </button>
+              </div>
+            )}
           </motion.div>
           
           {/* Main Dashboard Sections */}
@@ -244,14 +324,14 @@ const InfluencerDashboard: React.FC = () => {
                               <p className="text-sm text-foreground/70">{opportunity.company}</p>
                             </div>
                             <span className="text-sm font-medium bg-primary/10 text-primary px-2 py-0.5 rounded-full flex items-center">
-                              <Star size={12} className="mr-1 fill-primary" />
+                              <Sparkles size={12} className="mr-1" />
                               {opportunity.matchScore}% Match
                             </span>
                           </div>
                           <div className="flex items-center justify-between mt-3">
                             <div className="flex items-center gap-4">
                               <span className="text-sm text-foreground/70">
-                                ${opportunity.budget}
+                                {opportunity.budget}
                               </span>
                               <span className="text-sm text-foreground/70">
                                 Due: {opportunity.dueDate}
@@ -319,7 +399,7 @@ const InfluencerDashboard: React.FC = () => {
                         <span>10.5K</span>
                       </div>
                       <div className="flex items-center gap-1 text-sm">
-                        <Twitter size={16} className="text-blue-500" />
+                        <TikTokIcon />
                         <span>5.0K</span>
                       </div>
                     </div>
@@ -361,67 +441,9 @@ const InfluencerDashboard: React.FC = () => {
                 </div>
               </div>
               
-              {/* Active Campaigns Preview */}
-              <div className="bg-white rounded-xl shadow-card border border-border/30 overflow-hidden mt-6">
-                <div className="flex justify-between items-center p-5 border-b border-border/30">
-                  <h2 className="text-xl font-semibold">Active Campaigns</h2>
-                </div>
-                
-                <div className="divide-y divide-border/30">
-                  {mockData.activeCampaigns.map((campaign) => (
-                    <div key={campaign.id} className="p-5 hover:bg-secondary/30 transition-colors">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full overflow-hidden border border-border flex-shrink-0">
-                            <img 
-                              src={campaign.logo} 
-                              alt={campaign.company}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                          <h3 className="font-medium text-sm">{campaign.title}</h3>
-                        </div>
-                        <span className={`text-xs px-2 py-0.5 rounded-full ${
-                          campaign.status === 'In Progress' 
-                            ? 'bg-blue-100 text-blue-600' 
-                            : 'bg-green-100 text-green-600'
-                        }`}>
-                          {campaign.status}
-                        </span>
-                      </div>
-                      <div className="mt-2">
-                        <div className="flex justify-between text-xs text-foreground/70 mb-1">
-                          <span>Progress</span>
-                          <span>{campaign.progress}%</span>
-                        </div>
-                        <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-primary rounded-full" 
-                            style={{ width: `${campaign.progress}%` }}
-                          />
-                        </div>
-                      </div>
-                      <div className="flex justify-between items-center mt-3">
-                        <span className="text-xs text-foreground/70">Due: {campaign.dueDate}</span>
-                        <Link 
-                          to={`/campaign/${campaign.id}`} 
-                          className="text-xs font-medium text-primary hover:underline"
-                        >
-                          View Campaign
-                        </Link>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                
-                <div className="p-5 bg-secondary/30 border-t border-border/30">
-                  <Link 
-                    to="/campaigns/active" 
-                    className="block w-full py-2.5 text-center text-foreground font-medium bg-white border border-border rounded-md hover:bg-secondary/50 transition-colors"
-                  >
-                    Manage All Campaigns
-                  </Link>
-                </div>
+              {/* AI Matchmaking */}
+              <div className="bg-white rounded-xl shadow-card border border-border/30 overflow-hidden mt-6 p-5">
+                <AIMatchmaking influencerId={1} />
               </div>
             </motion.div>
           </div>
