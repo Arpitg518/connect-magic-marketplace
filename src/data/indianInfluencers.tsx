@@ -1,5 +1,4 @@
-
-import { Instagram, Youtube } from 'lucide-react';
+import { Instagram, Youtube, Twitter } from 'lucide-react';
 import React from 'react';
 
 // Custom TikTok icon as a proper React component
@@ -28,107 +27,100 @@ export const indianInfluencers = [
   {
     id: 1,
     name: 'Komal Pandey',
-    image: 'https://images.unsplash.com/photo-1597223557154-721c1cecc4b0?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
+    profileImage: 'https://images.unsplash.com/photo-1597223557154-721c1cecc4b0?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
     category: 'Fashion & Lifestyle',
-    followers: '1.5M',
-    platform: 'Instagram',
-    platformIcon: <Instagram size={16} />,
-    verified: true,
+    followers: 1500000,
+    engagement: 4.8,
     city: 'Delhi',
     coordinates: { lat: 28.6139, lng: 77.2090 },
-    tags: ['fashion', 'beauty', 'lifestyle'],
-    engagement: 4.8,
-    bio: 'Fashion stylist and digital content creator specializing in contemporary Indian fashion and lifestyle trends.'
+    socialLinks: {
+      instagram: 'https://instagram.com/komal.pandey',
+      youtube: 'https://youtube.com/c/komalpandey'
+    }
   },
   {
     id: 2,
     name: 'Ranveer Allahbadia',
-    image: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
+    profileImage: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
     category: 'Fitness & Motivation',
-    followers: '2.1M',
-    platform: 'YouTube',
-    platformIcon: <Youtube size={16} />,
-    verified: true,
+    followers: 2100000,
+    engagement: 5.2,
     city: 'Mumbai',
     coordinates: { lat: 19.0760, lng: 72.8777 },
-    tags: ['fitness', 'motivation', 'entrepreneurship'],
-    engagement: 5.2,
-    bio: 'Entrepreneur, podcaster, and fitness enthusiast helping young Indians achieve their personal and professional goals.'
+    socialLinks: {
+      youtube: 'https://youtube.com/c/ranveerallahbadia',
+      instagram: 'https://instagram.com/beerbiceps'
+    }
   },
   {
     id: 3,
     name: 'Kritika Khurana',
-    image: 'https://images.unsplash.com/photo-1615473967657-9dc21696d30f?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
+    profileImage: 'https://images.unsplash.com/photo-1615473967657-9dc21696d30f?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
     category: 'Travel & Lifestyle',
-    followers: '1.3M',
-    platform: 'TikTok',
-    platformIcon: <TikTokIcon />,
-    verified: true,
+    followers: 1300000,
+    engagement: 4.5,
     city: 'Bangalore',
     coordinates: { lat: 12.9716, lng: 77.5946 },
-    tags: ['travel', 'fashion', 'lifestyle'],
-    engagement: 4.5,
-    bio: 'Travel blogger and fashion enthusiast sharing Indian and international destinations through a fashionable lens.'
+    socialLinks: {
+      instagram: 'https://instagram.com/thatbohogirl',
+      tiktok: 'https://tiktok.com/@thatbohogirl'
+    }
   },
   {
     id: 4,
     name: 'Nikhil Sharma',
-    image: 'https://images.unsplash.com/photo-1618641986557-1ecd230959aa?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
+    profileImage: 'https://images.unsplash.com/photo-1618641986557-1ecd230959aa?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
     category: 'Tech & Gadgets',
-    followers: '1.8M',
-    platform: 'YouTube',
-    platformIcon: <Youtube size={16} />,
-    verified: true,
+    followers: 1800000,
+    engagement: 4.9,
     city: 'Hyderabad',
     coordinates: { lat: 17.3850, lng: 78.4867 },
-    tags: ['tech', 'gadgets', 'reviews'],
-    engagement: 4.9,
-    bio: 'Tech reviewer and gadget enthusiast covering the latest technology trends and products available in the Indian market.'
+    socialLinks: {
+      youtube: 'https://youtube.com/c/mumbiker',
+      twitter: 'https://twitter.com/mumbiker'
+    }
   },
   {
     id: 5,
     name: 'Prajakta Koli',
-    image: 'https://images.unsplash.com/photo-1601288496920-b6154fe3626a?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
+    profileImage: 'https://images.unsplash.com/photo-1601288496920-b6154fe3626a?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
     category: 'Comedy & Entertainment',
-    followers: '6.7M',
-    platform: 'Instagram',
-    platformIcon: <Instagram size={16} />,
-    verified: true,
+    followers: 6700000,
+    engagement: 5.7,
     city: 'Mumbai',
     coordinates: { lat: 19.0760, lng: 72.8777 },
-    tags: ['comedy', 'entertainment', 'lifestyle'],
-    engagement: 5.7,
-    bio: 'Digital content creator specializing in relatable comedy and entertainment for young Indian audiences.'
+    socialLinks: {
+      instagram: 'https://instagram.com/mostlysane',
+      youtube: 'https://youtube.com/c/MostlySane'
+    }
   },
   {
     id: 6,
     name: 'Ankush Bahuguna',
-    image: 'https://images.unsplash.com/photo-1584043720379-b56cd9199c94?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
+    profileImage: 'https://images.unsplash.com/photo-1584043720379-b56cd9199c94?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
     category: 'Beauty & Makeup',
-    followers: '980K',
-    platform: 'Instagram',
-    platformIcon: <Instagram size={16} />,
-    verified: true,
+    followers: 980000,
+    engagement: 4.3,
     city: 'Delhi',
     coordinates: { lat: 28.6139, lng: 77.2090 },
-    tags: ['beauty', 'makeup', 'fashion'],
-    engagement: 4.3,
-    bio: 'Beauty creator breaking gender stereotypes in the Indian makeup industry with creative and inspirational content.'
+    socialLinks: {
+      instagram: 'https://instagram.com/ankushbahuguna',
+      youtube: 'https://youtube.com/c/ankushbahuguna'
+    }
   },
   {
     id: 7,
     name: 'Diipa Büller-Khosla',
-    image: 'https://images.unsplash.com/photo-1563620915-6e8c3fee1b5b?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
+    profileImage: 'https://images.unsplash.com/photo-1563620915-6e8c3fee1b5b?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
     category: 'Luxury & Fashion',
-    followers: '1.7M',
-    platform: 'Instagram',
-    platformIcon: <Instagram size={16} />,
-    verified: true,
+    followers: 1700000,
+    engagement: 4.6,
     city: 'Delhi',
     coordinates: { lat: 28.6139, lng: 77.2090 },
-    tags: ['luxury', 'fashion', 'lifestyle'],
-    engagement: 4.6,
-    bio: 'International fashion icon and entrepreneur connecting Indian luxury with global fashion trends.'
+    socialLinks: {
+      instagram: 'https://instagram.com/diipakhosla',
+      twitter: 'https://twitter.com/diipakhosla'
+    }
   }
 ];
 
