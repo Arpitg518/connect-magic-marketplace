@@ -14,19 +14,24 @@ export const subscribeToTable = (
   callback: (payload: any) => void,
   event: 'INSERT' | 'UPDATE' | 'DELETE' | '*' = '*'
 ) => {
-  const subscription = supabase
-    .channel(`public:${tableName}`)
+  const channel = supabase.channel(`table-changes:${tableName}`);
+  
+  const subscription = channel
     .on(
       'postgres_changes',
-      { event, schema: 'public', table: tableName },
+      {
+        event: event,
+        schema: 'public',
+        table: tableName,
+      },
       (payload) => {
         callback(payload);
       }
     )
     .subscribe();
 
-  // Return the subscription so it can be unsubscribed later
-  return subscription;
+  // Return the channel so it can be unsubscribed later
+  return channel;
 };
 
 // Functions for influencer data

@@ -14,7 +14,7 @@ import BusinessDashboard from "./pages/dashboard/BusinessDashboard";
 import InfluencerProfile from "./pages/profile/InfluencerProfile";
 import BusinessProfile from "./pages/profile/BusinessProfile";
 import Influencers from "./pages/Influencers";
-import Businesses from "./pages/Influencers"; // Temporary using the same component
+import Businesses from "./pages/Businesses";
 
 const queryClient = new QueryClient();
 

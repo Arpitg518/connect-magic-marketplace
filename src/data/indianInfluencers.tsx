@@ -1,3 +1,4 @@
+
 import { Instagram, Youtube, Twitter } from 'lucide-react';
 import React from 'react';
 
@@ -28,6 +29,7 @@ export const indianInfluencers = [
     id: 1,
     name: 'Komal Pandey',
     profileImage: 'https://images.unsplash.com/photo-1597223557154-721c1cecc4b0?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
+    image: 'https://images.unsplash.com/photo-1597223557154-721c1cecc4b0?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
     category: 'Fashion & Lifestyle',
     followers: 1500000,
     engagement: 4.8,
@@ -36,12 +38,18 @@ export const indianInfluencers = [
     socialLinks: {
       instagram: 'https://instagram.com/komal.pandey',
       youtube: 'https://youtube.com/c/komalpandey'
-    }
+    },
+    platform: 'Instagram',
+    platformIcon: <Instagram size={12} className="mr-1" />,
+    tags: ['fashion', 'lifestyle', 'beauty'],
+    bio: 'Fashion influencer sharing style tips and lifestyle content',
+    verified: true
   },
   {
     id: 2,
     name: 'Ranveer Allahbadia',
     profileImage: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
+    image: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
     category: 'Fitness & Motivation',
     followers: 2100000,
     engagement: 5.2,
@@ -50,12 +58,18 @@ export const indianInfluencers = [
     socialLinks: {
       youtube: 'https://youtube.com/c/ranveerallahbadia',
       instagram: 'https://instagram.com/beerbiceps'
-    }
+    },
+    platform: 'YouTube',
+    platformIcon: <Youtube size={12} className="mr-1" />,
+    tags: ['fitness', 'motivation', 'lifestyle'],
+    bio: 'Entrepreneur, podcaster, and fitness enthusiast sharing knowledge on personal growth',
+    verified: true
   },
   {
     id: 3,
     name: 'Kritika Khurana',
     profileImage: 'https://images.unsplash.com/photo-1615473967657-9dc21696d30f?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
+    image: 'https://images.unsplash.com/photo-1615473967657-9dc21696d30f?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
     category: 'Travel & Lifestyle',
     followers: 1300000,
     engagement: 4.5,
@@ -64,12 +78,18 @@ export const indianInfluencers = [
     socialLinks: {
       instagram: 'https://instagram.com/thatbohogirl',
       tiktok: 'https://tiktok.com/@thatbohogirl'
-    }
+    },
+    platform: 'Instagram',
+    platformIcon: <Instagram size={12} className="mr-1" />,
+    tags: ['travel', 'fashion', 'lifestyle'],
+    bio: 'Travel and fashion influencer sharing bohemian style and wanderlust inspiration',
+    verified: true
   },
   {
     id: 4,
     name: 'Nikhil Sharma',
     profileImage: 'https://images.unsplash.com/photo-1618641986557-1ecd230959aa?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
+    image: 'https://images.unsplash.com/photo-1618641986557-1ecd230959aa?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
     category: 'Tech & Gadgets',
     followers: 1800000,
     engagement: 4.9,
@@ -78,12 +98,18 @@ export const indianInfluencers = [
     socialLinks: {
       youtube: 'https://youtube.com/c/mumbiker',
       twitter: 'https://twitter.com/mumbiker'
-    }
+    },
+    platform: 'YouTube',
+    platformIcon: <Youtube size={12} className="mr-1" />,
+    tags: ['tech', 'gadgets', 'reviews'],
+    bio: 'Tech reviewer and gadget enthusiast exploring the latest in technology',
+    verified: false
   },
   {
     id: 5,
     name: 'Prajakta Koli',
     profileImage: 'https://images.unsplash.com/photo-1601288496920-b6154fe3626a?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
+    image: 'https://images.unsplash.com/photo-1601288496920-b6154fe3626a?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
     category: 'Comedy & Entertainment',
     followers: 6700000,
     engagement: 5.7,
@@ -92,12 +118,18 @@ export const indianInfluencers = [
     socialLinks: {
       instagram: 'https://instagram.com/mostlysane',
       youtube: 'https://youtube.com/c/MostlySane'
-    }
+    },
+    platform: 'YouTube',
+    platformIcon: <Youtube size={12} className="mr-1" />,
+    tags: ['comedy', 'entertainment', 'lifestyle'],
+    bio: 'Content creator bringing laughter through comedy sketches and relatable content',
+    verified: true
   },
   {
     id: 6,
     name: 'Ankush Bahuguna',
     profileImage: 'https://images.unsplash.com/photo-1584043720379-b56cd9199c94?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
+    image: 'https://images.unsplash.com/photo-1584043720379-b56cd9199c94?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
     category: 'Beauty & Makeup',
     followers: 980000,
     engagement: 4.3,
@@ -106,12 +138,18 @@ export const indianInfluencers = [
     socialLinks: {
       instagram: 'https://instagram.com/ankushbahuguna',
       youtube: 'https://youtube.com/c/ankushbahuguna'
-    }
+    },
+    platform: 'Instagram',
+    platformIcon: <Instagram size={12} className="mr-1" />,
+    tags: ['beauty', 'makeup', 'skincare'],
+    bio: 'Beauty influencer breaking stereotypes and sharing makeup tutorials',
+    verified: false
   },
   {
     id: 7,
     name: 'Diipa Büller-Khosla',
     profileImage: 'https://images.unsplash.com/photo-1563620915-6e8c3fee1b5b?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
+    image: 'https://images.unsplash.com/photo-1563620915-6e8c3fee1b5b?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
     category: 'Luxury & Fashion',
     followers: 1700000,
     engagement: 4.6,
@@ -120,7 +158,12 @@ export const indianInfluencers = [
     socialLinks: {
       instagram: 'https://instagram.com/diipakhosla',
       twitter: 'https://twitter.com/diipakhosla'
-    }
+    },
+    platform: 'Instagram',
+    platformIcon: <Instagram size={12} className="mr-1" />,
+    tags: ['luxury', 'fashion', 'lifestyle'],
+    bio: 'Global fashion icon and entrepreneur advocating for diversity in the fashion industry',
+    verified: true
   }
 ];
 

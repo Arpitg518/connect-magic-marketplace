@@ -1,15 +1,15 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Check, Star, Heart, X, MessageCircle } from 'lucide-react';
+import { Check, Star, Heart, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-interface InfluencerCardProps {
+export interface InfluencerCardProps {
   id: number;
   name: string;
   image: string;
   category: string;
-  followers: string;
+  followers: number;
   platform: string;
   platformIcon: React.ReactNode;
   city: string;
@@ -33,6 +33,16 @@ const InfluencerCard: React.FC<InfluencerCardProps> = ({
   verified = false,
   bio
 }) => {
+  // Format the follower count
+  const formatFollowers = (count: number): string => {
+    if (count >= 1000000) {
+      return (count / 1000000).toFixed(1) + 'M';
+    } else if (count >= 1000) {
+      return (count / 1000).toFixed(1) + 'K';
+    }
+    return count.toString();
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
@@ -51,7 +61,7 @@ const InfluencerCard: React.FC<InfluencerCardProps> = ({
         {/* Follower count badge */}
         <div className="absolute top-4 right-4 bg-black/40 backdrop-blur-sm text-white text-xs font-medium py-1 px-2 rounded-full flex items-center">
           {platformIcon}
-          <span className="ml-1">{followers} followers</span>
+          <span className="ml-1">{formatFollowers(followers)} followers</span>
         </div>
         
         {/* Verified badge */}

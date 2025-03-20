@@ -79,7 +79,7 @@ export const matchInfluencerWithBusiness = async (
     }
     
     if (audienceReach > 0.7) {
-      reasoning.push(`${influencer.name}'s audience size (${influencer.followers}) provides significant reach for ${business.name}'s products.`);
+      reasoning.push(`${influencer.name}'s audience size (${formatNumber(influencer.followers)}) provides significant reach for ${business.name}'s products.`);
     }
     
     if (influencer.engagement > 4) {
@@ -114,14 +114,20 @@ function calculateSimilarity(text1: string, text2: string): number {
   return intersection.size / union.size;
 }
 
-// Map follower count string to a normalized score
-function mapFollowerCountToScore(followers: string): number {
-  const count = parseFloat(followers.replace(/[^0-9.]/g, ''));
-  const unit = followers.includes('M') ? 1000000 : followers.includes('K') ? 1000 : 1;
-  const actualCount = count * unit;
-  
+// Map follower count to a normalized score
+function mapFollowerCountToScore(followers: number): number {
   // Normalize: 0 for 0 followers, 1 for 10M+ followers, logarithmic scale in between
-  return Math.min(1, Math.log10(Math.max(1, actualCount)) / 7);
+  return Math.min(1, Math.log10(Math.max(1, followers)) / 7);
+}
+
+// Format numbers for display (e.g., 1500000 -> 1.5M)
+function formatNumber(num: number): string {
+  if (num >= 1000000) {
+    return (num / 1000000).toFixed(1) + 'M';
+  } else if (num >= 1000) {
+    return (num / 1000).toFixed(1) + 'K';
+  }
+  return num.toString();
 }
 
 // Determine platform suitability for business category
