@@ -1,8 +1,9 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -11,12 +12,28 @@ import FeatureShowcase from '@/components/FeatureShowcase';
 import InfluencerShowcase from '@/components/InfluencerShowcase';
 import BrandShowcase from '@/components/BrandShowcase';
 import TestimonialSection from '@/components/TestimonialSection';
+import SupabaseSetup from '@/components/SupabaseSetup';
 
 const Index = () => {
-  // Scroll to top on page load
+  const [showSupabaseSetup, setShowSupabaseSetup] = useState(false);
+  const [isSupabaseConfigured, setIsSupabaseConfigured] = useState(false);
+
+  // Check if Supabase is configured
   useEffect(() => {
+    const supabaseUrl = localStorage.getItem('supabaseUrl');
+    const supabaseAnonKey = localStorage.getItem('supabaseAnonKey');
+    setIsSupabaseConfigured(Boolean(supabaseUrl && supabaseAnonKey));
+    
+    // Scroll to top on page load
     window.scrollTo(0, 0);
   }, []);
+
+  const handleSupabaseSetup = (url: string, anonKey: string) => {
+    // This function would trigger recreation of the Supabase client with the new credentials
+    setIsSupabaseConfigured(true);
+    // In a real app, you would reinitialize the Supabase client here
+    setShowSupabaseSetup(false);
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -29,6 +46,24 @@ const Index = () => {
         {/* Feature Showcase */}
         <FeatureShowcase />
         
+        {/* Supabase Setup Modal */}
+        {showSupabaseSetup && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="max-w-md w-full">
+              <SupabaseSetup 
+                onSetup={handleSupabaseSetup} 
+                isConfigured={isSupabaseConfigured} 
+              />
+              <button 
+                className="mt-4 text-white hover:underline w-full text-center"
+                onClick={() => setShowSupabaseSetup(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+        
         {/* Influencer Showcase */}
         <InfluencerShowcase />
         
@@ -37,6 +72,25 @@ const Index = () => {
         
         {/* Testimonials */}
         <TestimonialSection />
+        
+        {/* Supabase Integration CTA */}
+        <section className="py-12 bg-gradient-to-r from-blue-50 to-indigo-50">
+          <div className="container mx-auto px-4 md:px-6">
+            <div className="max-w-3xl mx-auto text-center">
+              <h3 className="text-2xl font-bold mb-4">Enable Real-time Data with Supabase</h3>
+              <p className="text-muted-foreground mb-6">
+                Connect your app to Supabase to enable real-time data, authentication, and more powerful features.
+              </p>
+              <Button
+                onClick={() => setShowSupabaseSetup(true)}
+                variant={isSupabaseConfigured ? "outline" : "default"}
+                className="mx-auto"
+              >
+                {isSupabaseConfigured ? "Supabase Connected ✓" : "Configure Supabase"}
+              </Button>
+            </div>
+          </div>
+        </section>
         
         {/* CTA Section */}
         <section className="py-16 md:py-24">

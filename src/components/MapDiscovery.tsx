@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { indianInfluencers } from '@/data/indianInfluencers';
 import { toast } from '@/components/ui/use-toast';
+import { isGoogleMapsLoaded, generateMarkerContent } from '@/utils/mapUtils';
 
 interface MapDiscoveryProps {
   onCitySelect: (city: string) => void;
@@ -62,13 +63,7 @@ const MapDiscovery: React.FC<MapDiscoveryProps> = ({ onCitySelect }) => {
           
           // Add info window for each marker
           const infoWindow = new window.google.maps.InfoWindow({
-            content: `
-              <div class="p-2">
-                <h3 class="font-semibold">${city}</h3>
-                <p>${data.count} influencers available</p>
-                <button id="view-${city.replace(/\s+/g, '-')}" class="text-xs text-primary font-medium">View Influencers</button>
-              </div>
-            `
+            content: generateMarkerContent(city, data.count)
           });
           
           marker.addListener('click', () => {
@@ -100,7 +95,7 @@ const MapDiscovery: React.FC<MapDiscoveryProps> = ({ onCitySelect }) => {
 
     // Function to load Google Maps API
     const loadGoogleMapsAPI = () => {
-      if (window.google && window.google.maps) {
+      if (isGoogleMapsLoaded()) {
         console.log("Google Maps API already loaded");
         initializeMap();
         return;
@@ -114,7 +109,7 @@ const MapDiscovery: React.FC<MapDiscoveryProps> = ({ onCitySelect }) => {
         initializeMap();
       };
       
-      // Create and append the script element
+      // Create and append the script element with the correct API key
       const script = document.createElement('script');
       script.src = `https://maps.gomaps.pro/map/lib/api?key=AlzaSyILn4tQ43sZeGmgDIyzbl9KLF7R8i-O2Tb&callback=initMap`;
       script.async = true;
@@ -143,7 +138,7 @@ const MapDiscovery: React.FC<MapDiscoveryProps> = ({ onCitySelect }) => {
       
       // Remove the callback from window object
       if (window.initMap) {
-        window.initMap = null;
+        window.initMap = undefined;
       }
     };
   }, [citiesWithInfluencers, onCitySelect]);

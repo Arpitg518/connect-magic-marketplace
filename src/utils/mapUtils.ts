@@ -25,3 +25,34 @@ export const generateMarkerContent = (city: string, count: number): string => {
     </div>
   `;
 };
+
+// Convert coordinates to address (for future use)
+export const reverseGeocode = async (lat: number, lng: number): Promise<string> => {
+  try {
+    if (!isGoogleMapsLoaded()) {
+      throw new Error("Google Maps API not loaded");
+    }
+    
+    const geocoder = new window.google.maps.Geocoder();
+    const response = await new Promise<google.maps.GeocoderResponse>((resolve, reject) => {
+      geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+        if (status === "OK" && results && results.length > 0) {
+          resolve(results);
+        } else {
+          reject(new Error(`Geocoder failed: ${status}`));
+        }
+      });
+    });
+    
+    // Find city from address components
+    const addressComponents = response[0].address_components;
+    const cityComponent = addressComponents.find(
+      component => component.types.includes("locality") || component.types.includes("administrative_area_level_2")
+    );
+    
+    return cityComponent ? cityComponent.long_name : "Unknown location";
+  } catch (error) {
+    console.error("Error in reverseGeocode:", error);
+    return "Unknown location";
+  }
+};
