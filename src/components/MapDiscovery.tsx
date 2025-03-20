@@ -111,7 +111,8 @@ const MapDiscovery: React.FC<MapDiscoveryProps> = ({ onCitySelect }) => {
       
       // Create and append the script element with the correct API key
       const script = document.createElement('script');
-      script.src = `https://maps.gomaps.pro/map/lib/api?key=AlzaSyILn4tQ43sZeGmgDIyzbl9KLF7R8i-O2Tb&callback=initMap`;
+      // Use the API key properly
+      script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyILn4tQ43sZeGmgDIyzbl9KLF7R8i-O2Tb&callback=initMap`;
       script.async = true;
       script.defer = true;
       

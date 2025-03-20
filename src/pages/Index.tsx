@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
@@ -45,6 +45,57 @@ const Index = () => {
         
         {/* Feature Showcase */}
         <FeatureShowcase />
+        
+        {/* Quick Access Links */}
+        <section className="py-12 bg-secondary/20">
+          <div className="container mx-auto px-4 md:px-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+                className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow"
+              >
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Search className="text-primary" />
+                  </div>
+                  <h3 className="text-xl font-semibold">Find Influencers</h3>
+                </div>
+                <p className="text-foreground/70 mb-6">
+                  Discover and connect with top influencers across India. Filter by location, category, and engagement rates.
+                </p>
+                <Link to="/influencers" className="flex items-center text-primary font-medium hover:underline group">
+                  <span>Explore Influencers</span>
+                  <ArrowRight size={16} className="ml-2 transition-transform group-hover:translate-x-1" />
+                </Link>
+              </motion.div>
+              
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow"
+              >
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                    <Search className="text-blue-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold">Find Businesses</h3>
+                </div>
+                <p className="text-foreground/70 mb-6">
+                  Connect with businesses looking for influencer collaborations. Filter by industry, budget, and campaign types.
+                </p>
+                <Link to="/businesses" className="flex items-center text-blue-600 font-medium hover:underline group">
+                  <span>Explore Businesses</span>
+                  <ArrowRight size={16} className="ml-2 transition-transform group-hover:translate-x-1" />
+                </Link>
+              </motion.div>
+            </div>
+          </div>
+        </section>
         
         {/* Supabase Setup Modal */}
         {showSupabaseSetup && (

@@ -13,6 +13,7 @@ import InfluencerDashboard from "./pages/dashboard/InfluencerDashboard";
 import BusinessDashboard from "./pages/dashboard/BusinessDashboard";
 import InfluencerProfile from "./pages/profile/InfluencerProfile";
 import BusinessProfile from "./pages/profile/BusinessProfile";
+import Influencers from "./pages/Influencers";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,10 @@ const App = () => (
             {/* Profile Routes */}
             <Route path="/influencer/:id" element={<InfluencerProfile />} />
             <Route path="/business/:id" element={<BusinessProfile />} />
+            
+            {/* Influencers Listing Page */}
+            <Route path="/influencers" element={<Influencers />} />
+            <Route path="/businesses" element={<Influencers />} />
             
             {/* Catch-all Route */}
             <Route path="*" element={<NotFound />} />
