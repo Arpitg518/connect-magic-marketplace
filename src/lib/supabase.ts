@@ -14,9 +14,11 @@ export const subscribeToTable = (
   callback: (payload: any) => void,
   event: 'INSERT' | 'UPDATE' | 'DELETE' | '*' = '*'
 ) => {
-  const channel = supabase.channel(`table-changes:${tableName}`);
+  // Create a channel for real-time events
+  const channel = supabase.channel(`public:${tableName}`);
   
-  const subscription = channel
+  // Subscribe to changes on the specified table
+  channel
     .on(
       'postgres_changes',
       {

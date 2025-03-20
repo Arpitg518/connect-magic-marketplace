@@ -46,7 +46,11 @@ export function useRealtimeData<T>(
     fetchData();
     
     // Set up real-time subscription
-    const newSubscription = subscribeToTable(tableName, async (payload) => {
+    const channel = subscribeToTable(tableName, (payload) => {
+      console.log('Realtime update received:', payload);
+      // Check if still mounted before updating state
+      if (!isMounted) return;
+
       // Handle real-time updates
       if (payload.eventType === 'INSERT') {
         // Add new record to the data array
@@ -66,7 +70,7 @@ export function useRealtimeData<T>(
       }
     });
     
-    setSubscription(newSubscription);
+    setSubscription(channel);
     
     // Cleanup function
     return () => {
@@ -75,7 +79,7 @@ export function useRealtimeData<T>(
         subscription.unsubscribe();
       }
     };
-  }, [tableName]);
+  }, [tableName]); // Only re-run if tableName changes
 
   // Function to manually refresh the data
   const refresh = async () => {
