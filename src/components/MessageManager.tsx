@@ -62,6 +62,26 @@ const MessageManager: React.FC<MessageManagerProps> = ({ currentUser, className 
     return () => window.removeEventListener('resize', handleResize);
   }, []);
   
+  // Check URL parameters for initialization
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const userId = searchParams.get('user');
+    const userType = searchParams.get('type');
+    
+    if (userId && userType) {
+      const user = allUsers.find(u => 
+        u.id === parseInt(userId) && u.type === userType
+      );
+      
+      if (user) {
+        setSelectedUser(user);
+        if (isMobileView) {
+          setShowConversations(false);
+        }
+      }
+    }
+  }, [allUsers]);
+  
   // Handle selecting a user
   const handleSelectUser = (user: User) => {
     setSelectedUser(user);

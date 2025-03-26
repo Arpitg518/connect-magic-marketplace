@@ -16,6 +16,7 @@ import BusinessProfile from "./pages/profile/BusinessProfile";
 import Influencers from "./pages/Influencers";
 import Businesses from "./pages/Businesses";
 import Messages from "./pages/Messages";
+import Profile from "./pages/Profile";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
             {/* Profile Routes */}
             <Route path="/influencer/:id" element={<InfluencerProfile />} />
             <Route path="/business/:id" element={<BusinessProfile />} />
+            <Route path="/profile" element={<Profile />} />
             
             {/* Messaging Route */}
             <Route path="/messages" element={<Messages />} />
@@ -47,6 +49,9 @@ const App = () => (
             {/* Influencers and Businesses Listing Pages */}
             <Route path="/influencers" element={<Influencers />} />
             <Route path="/businesses" element={<Businesses />} />
+            
+            {/* How It Works page (placeholder) */}
+            <Route path="/how-it-works" element={<Index />} />
             
             {/* Catch-all Route */}
             <Route path="*" element={<NotFound />} />

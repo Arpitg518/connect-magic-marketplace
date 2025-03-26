@@ -59,7 +59,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
         
         // Set up realtime subscription for new messages
         const channel = supabase
-          .channel('public:messages')
+          .channel('messages-channel')
           .on('postgres_changes', 
             { 
               event: 'INSERT', 
@@ -82,7 +82,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
                 const prevMsgs = prev[convoKey] || [];
                 return {
                   ...prev,
-                  [convoKey]: [...prevMsgs, payload.new]
+                  [convoKey]: [...prevMsgs, payload.new as Message]
                 };
               });
             }

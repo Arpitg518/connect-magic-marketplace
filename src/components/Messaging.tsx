@@ -7,7 +7,7 @@ import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Send, UserCircle2, Phone, Video, MoreVertical, ChevronLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { getMessagesBetweenUsers, sendMessage, markMessagesAsRead } from '@/lib/supabase';
+import { getMessagesBetweenUsers, sendMessage, markMessagesAsRead, supabase } from '@/lib/supabase';
 
 interface Message {
   id: number;
@@ -50,7 +50,7 @@ const Messaging: React.FC<MessagingProps> = ({ currentUser, receiver, onBack, cl
         
         // Set up realtime subscription for new messages
         const channel = supabase
-          .channel('public:messages')
+          .channel('messages-realtime')
           .on('postgres_changes', 
             { 
               event: 'INSERT', 
@@ -60,7 +60,7 @@ const Messaging: React.FC<MessagingProps> = ({ currentUser, receiver, onBack, cl
             }, 
             async (payload) => {
               if (payload.new.sender_id === receiver.id) {
-                setMessages(prev => [...prev, payload.new]);
+                setMessages(prev => [...prev, payload.new as Message]);
                 await markMessagesAsRead(currentUser.id, receiver.id);
               }
             }

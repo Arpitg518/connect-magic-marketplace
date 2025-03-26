@@ -16,7 +16,7 @@ export const subscribeToTable = (
 ) => {
   // Create a channel for real-time events
   const channel = supabase
-    .channel(`public:${tableName}`)
+    .channel(`public-${tableName}`)
     .on(
       'postgres_changes',
       {

@@ -1,11 +1,14 @@
 
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { PhoneCall, Mail, ExternalLink } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import MessageManager from '@/components/MessageManager';
 import PageTransition from '@/components/layout/PageTransition';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { indianInfluencers, indianBusinesses } from '@/data/indianInfluencers';
 
 // For demo purposes - in a real app, this would come from authentication
@@ -18,7 +21,9 @@ const dummyUser = {
 
 const MessagesPage = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [initialized, setInitialized] = useState(false);
+  const [contactVisible, setContactVisible] = useState(false);
   
   // Parse URL parameters to get user and type
   useEffect(() => {
@@ -47,11 +52,58 @@ const MessagesPage = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className="p-4 md:p-6"
+                className="p-4 md:p-6 flex justify-between items-center"
               >
-                <h1 className="text-2xl font-bold mb-2 text-gray-200">Messages</h1>
-                <p className="text-gray-400">Connect with influencers and businesses</p>
+                <div>
+                  <h1 className="text-2xl font-bold mb-2 text-gray-200">Messages</h1>
+                  <p className="text-gray-400">Connect with influencers and businesses</p>
+                </div>
+                
+                <div>
+                  <Button 
+                    variant="outline"
+                    className="border-zinc-700 hover:bg-zinc-800 text-gray-200"
+                    onClick={() => setContactVisible(!contactVisible)}
+                  >
+                    {contactVisible ? 'Hide Contact Info' : 'Contact Us'}
+                  </Button>
+                </div>
               </motion.div>
+              
+              {contactVisible && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="px-4 md:px-6 mb-4"
+                >
+                  <Card className="bg-zinc-800 border-zinc-700 p-4 text-gray-200">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="flex items-center gap-3">
+                        <PhoneCall className="text-primary" />
+                        <div>
+                          <p className="text-sm text-gray-400">Phone Number</p>
+                          <p className="font-medium">+91 98765 43210</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Mail className="text-primary" />
+                        <div>
+                          <p className="text-sm text-gray-400">Email</p>
+                          <p className="font-medium">contact@influencerhub.in</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <ExternalLink className="text-primary" />
+                        <div>
+                          <p className="text-sm text-gray-400">Working Hours</p>
+                          <p className="font-medium">Mon-Fri: 9AM - 6PM IST</p>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                </motion.div>
+              )}
               
               <div className="flex-grow overflow-hidden rounded-xl border border-zinc-700/30 bg-zinc-900">
                 {initialized && (
@@ -61,6 +113,8 @@ const MessagesPage = () => {
             </div>
           </div>
         </main>
+        
+        <Footer />
       </div>
     </PageTransition>
   );
