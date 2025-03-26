@@ -15,6 +15,7 @@ import InfluencerProfile from "./pages/profile/InfluencerProfile";
 import BusinessProfile from "./pages/profile/BusinessProfile";
 import Influencers from "./pages/Influencers";
 import Businesses from "./pages/Businesses";
+import Messages from "./pages/Messages";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +40,9 @@ const App = () => (
             {/* Profile Routes */}
             <Route path="/influencer/:id" element={<InfluencerProfile />} />
             <Route path="/business/:id" element={<BusinessProfile />} />
+            
+            {/* Messaging Route */}
+            <Route path="/messages" element={<Messages />} />
             
             {/* Influencers and Businesses Listing Pages */}
             <Route path="/influencers" element={<Influencers />} />

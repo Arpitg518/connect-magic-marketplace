@@ -146,3 +146,19 @@ export function useRealtimeBusinesses(category?: string) {
     }
   });
 }
+
+/**
+ * A hook for real-time messaging
+ */
+export function useRealtimeMessages(userId1: number, userId2: number) {
+  return useRealtimeData('messages', async () => {
+    const { data, error } = await supabase
+      .from('messages')
+      .select('*')
+      .or(`and(sender_id.eq.${userId1},receiver_id.eq.${userId2}),and(sender_id.eq.${userId2},receiver_id.eq.${userId1})`)
+      .order('created_at', { ascending: true });
+      
+    if (error) throw error;
+    return data;
+  });
+}
