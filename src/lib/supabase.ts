@@ -146,7 +146,7 @@ export const getConversations = async (userId: number, userType: 'influencer' | 
   }
 
   // Group messages by conversation
-  const conversations = data.reduce((acc, message) => {
+  const conversations = data.reduce((acc: any, message: any) => {
     const conversationId = message.sender_id === userId 
       ? `${userType}-${message.receiver_id}` 
       : `${userType}-${message.sender_id}`;

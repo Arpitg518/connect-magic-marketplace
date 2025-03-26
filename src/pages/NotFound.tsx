@@ -19,16 +19,16 @@ const NotFound = () => {
 
   return (
     <PageTransition>
-      <div className="min-h-screen flex flex-col bg-zinc-900 text-gray-100">
+      <div className="min-h-screen flex flex-col bg-white text-gray-900">
         <Header />
         <div className="flex-grow flex items-center justify-center">
           <div className="text-center px-4 py-10 max-w-md w-full">
             <h1 className="text-6xl font-bold text-primary mb-4">404</h1>
-            <p className="text-xl text-gray-300 mb-6">
+            <p className="text-xl text-gray-700 mb-6">
               Oops! We couldn't find the page you're looking for.
             </p>
-            <p className="text-gray-400 mb-8">
-              The page at <span className="font-medium text-gray-300">{location.pathname}</span> doesn't exist or may have been moved.
+            <p className="text-gray-600 mb-8">
+              The page at <span className="font-medium text-gray-800">{location.pathname}</span> doesn't exist or may have been moved.
             </p>
             <Button
               asChild

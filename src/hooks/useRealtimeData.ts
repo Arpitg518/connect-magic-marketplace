@@ -69,12 +69,14 @@ export function useRealtimeData<T>(
             // Update existing record in the data array
             setData(prevData => 
               prevData.map(item => 
+                // @ts-ignore
                 (item as any).id === payload.new.id ? payload.new as T : item
               )
             );
           } else if (payload.eventType === 'DELETE') {
             // Remove deleted record from the data array
             setData(prevData => 
+              // @ts-ignore
               prevData.filter(item => (item as any).id !== payload.old.id)
             );
           }

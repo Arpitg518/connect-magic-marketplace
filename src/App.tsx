@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -53,13 +53,14 @@ const App = () => (
             
             {/* Messaging Route */}
             <Route path="/messages" element={<Messages />} />
+            <Route path="/messages/:id" element={<Messages />} />
             
             {/* Influencers and Businesses Listing Pages */}
             <Route path="/influencers" element={<Influencers />} />
             <Route path="/businesses" element={<Businesses />} />
             
             {/* How It Works page */}
-            <Route path="/how-it-works" element={<Index />} />
+            <Route path="/how-it-works" element={<Navigate to="/" />} />
             
             {/* Catch-all Route */}
             <Route path="*" element={<NotFound />} />
