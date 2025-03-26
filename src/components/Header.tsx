@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Moon, Sun, User, LogOut, MessageSquare } from 'lucide-react';
+import { Menu, X, User, LogOut, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -78,6 +78,18 @@ const Header = () => {
                 }
               >
                 Messages
+              </Button>
+            </Link>
+            <Link to="/profile">
+              <Button
+                variant={isActive('/profile') ? 'default' : 'ghost'}
+                className={
+                  isActive('/profile')
+                    ? 'text-white'
+                    : 'text-gray-300 hover:text-white'
+                }
+              >
+                Profile
               </Button>
             </Link>
             <DropdownMenu>
@@ -159,15 +171,19 @@ const Header = () => {
                   Messages
                 </Button>
               </Link>
-              <div className="border-t border-zinc-800 my-3"></div>
               <Link to="/profile" className="block">
                 <Button
-                  variant="ghost"
-                  className="w-full justify-start text-gray-300 hover:text-white"
+                  variant={isActive('/profile') ? 'default' : 'ghost'}
+                  className={`w-full justify-start ${
+                    isActive('/profile') 
+                      ? 'text-white' 
+                      : 'text-gray-300 hover:text-white'
+                  }`}
                 >
-                  <User size={16} className="mr-2" /> Profile
+                  Profile
                 </Button>
               </Link>
+              <div className="border-t border-zinc-800 my-3"></div>
               <Button
                 variant="ghost"
                 className="w-full justify-start text-gray-400"

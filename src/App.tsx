@@ -18,13 +18,21 @@ import Businesses from "./pages/Businesses";
 import Messages from "./pages/Messages";
 import Profile from "./pages/Profile";
 
-const queryClient = new QueryClient();
+// Create a new query client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      staleTime: 30000,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
-      <Sonner />
+      <Sonner richColors closeButton position="top-right" />
       <BrowserRouter>
         <AnimatePresence mode="wait">
           <Routes>
@@ -50,7 +58,7 @@ const App = () => (
             <Route path="/influencers" element={<Influencers />} />
             <Route path="/businesses" element={<Businesses />} />
             
-            {/* How It Works page (placeholder) */}
+            {/* How It Works page */}
             <Route path="/how-it-works" element={<Index />} />
             
             {/* Catch-all Route */}

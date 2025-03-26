@@ -10,6 +10,7 @@ import PageTransition from '@/components/layout/PageTransition';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { indianInfluencers, indianBusinesses } from '@/data/indianInfluencers';
+import { toast } from 'sonner';
 
 // For demo purposes - in a real app, this would come from authentication
 const dummyUser = {
@@ -35,10 +36,19 @@ const MessagesPage = () => {
     if (userId && userType) {
       console.log(`Initializing chat with ${userType} ID: ${userId}`);
       // In a real app, this would initialize the chat with the specified user
+      toast.success("Chat initialized with user");
     }
     
     setInitialized(true);
   }, [location.search]);
+
+  const handleContactAction = (type: 'phone' | 'email') => {
+    if (type === 'phone') {
+      window.location.href = 'tel:+919876543210';
+    } else {
+      window.location.href = 'mailto:contact@influencerhub.in';
+    }
+  };
   
   return (
     <PageTransition>
@@ -79,14 +89,20 @@ const MessagesPage = () => {
                 >
                   <Card className="bg-zinc-800 border-zinc-700 p-4 text-gray-200">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="flex items-center gap-3">
+                      <div 
+                        className="flex items-center gap-3 cursor-pointer hover:bg-zinc-700/30 p-2 rounded-md transition-colors" 
+                        onClick={() => handleContactAction('phone')}
+                      >
                         <PhoneCall className="text-primary" />
                         <div>
                           <p className="text-sm text-gray-400">Phone Number</p>
                           <p className="font-medium">+91 98765 43210</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3">
+                      <div 
+                        className="flex items-center gap-3 cursor-pointer hover:bg-zinc-700/30 p-2 rounded-md transition-colors"
+                        onClick={() => handleContactAction('email')}
+                      >
                         <Mail className="text-primary" />
                         <div>
                           <p className="text-sm text-gray-400">Email</p>

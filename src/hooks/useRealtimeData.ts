@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { supabase, subscribeToTable } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { RealtimeChannel } from '@supabase/supabase-js';
 
 /**
@@ -45,38 +45,50 @@ export function useRealtimeData<T>(
     
     fetchData();
     
-    // Set up real-time subscription
-    const channel = subscribeToTable(tableName, (payload) => {
-      console.log('Realtime update received:', payload);
-      // Check if still mounted before updating state
-      if (!isMounted) return;
+    // Set up real-time subscription using the Supabase channel
+    const channel = supabase
+      .channel(`public-${tableName}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: tableName,
+        },
+        (payload) => {
+          // Check if still mounted before updating state
+          if (!isMounted) return;
 
-      // Handle real-time updates
-      if (payload.eventType === 'INSERT') {
-        // Add new record to the data array
-        setData(prevData => [...prevData, payload.new as T]);
-      } else if (payload.eventType === 'UPDATE') {
-        // Update existing record in the data array
-        setData(prevData => 
-          prevData.map(item => 
-            (item as any).id === payload.new.id ? payload.new as T : item
-          )
-        );
-      } else if (payload.eventType === 'DELETE') {
-        // Remove deleted record from the data array
-        setData(prevData => 
-          prevData.filter(item => (item as any).id !== payload.old.id)
-        );
-      }
-    });
+          console.log('Realtime update received:', payload);
+
+          // Handle real-time updates
+          if (payload.eventType === 'INSERT') {
+            // Add new record to the data array
+            setData(prevData => [...prevData, payload.new as T]);
+          } else if (payload.eventType === 'UPDATE') {
+            // Update existing record in the data array
+            setData(prevData => 
+              prevData.map(item => 
+                (item as any).id === payload.new.id ? payload.new as T : item
+              )
+            );
+          } else if (payload.eventType === 'DELETE') {
+            // Remove deleted record from the data array
+            setData(prevData => 
+              prevData.filter(item => (item as any).id !== payload.old.id)
+            );
+          }
+        }
+      )
+      .subscribe();
     
     setSubscription(channel);
     
     // Cleanup function
     return () => {
       isMounted = false;
-      if (subscription) {
-        subscription.unsubscribe();
+      if (channel) {
+        channel.unsubscribe();
       }
     };
   }, [tableName]); // Only re-run if tableName changes
@@ -111,14 +123,14 @@ export function useRealtimeInfluencers(city?: string) {
         .eq('city', city);
         
       if (error) throw error;
-      return data;
+      return data || [];
     } else {
       const { data, error } = await supabase
         .from('influencers')
         .select('*');
         
       if (error) throw error;
-      return data;
+      return data || [];
     }
   });
 }
@@ -135,14 +147,14 @@ export function useRealtimeBusinesses(category?: string) {
         .eq('category', category);
         
       if (error) throw error;
-      return data;
+      return data || [];
     } else {
       const { data, error } = await supabase
         .from('businesses')
         .select('*');
         
       if (error) throw error;
-      return data;
+      return data || [];
     }
   });
 }
@@ -159,6 +171,6 @@ export function useRealtimeMessages(userId1: number, userId2: number) {
       .order('created_at', { ascending: true });
       
     if (error) throw error;
-    return data;
+    return data || [];
   });
 }
