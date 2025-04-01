@@ -1,74 +1,51 @@
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Toaster } from '@/components/ui/toaster';
+import Messages from '@/pages/Messages';
+import Index from '@/pages/Index';
+import Influencers from '@/pages/Influencers';
+import Businesses from '@/pages/Businesses';
+import Profile from '@/pages/Profile';
+import NotFound from '@/pages/NotFound';
+import Header from './components/Header';
+import Footer from './components/Footer';
+import Home from './pages/Home';
+import Join from './pages/auth/Join';
+import Login from './pages/auth/Login';
+import BusinessProfile from './pages/BusinessProfile';
+import AIMatchmaking from './pages/AIMatchmaking';
+import InfluencerDashboard from '@/pages/InfluencerDashboard';
+import BusinessDashboard from '@/pages/BusinessDashboard';
+import PageTransition from '@/components/layout/PageTransition';
+import Learn from '@/pages/Learn';
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AnimatePresence } from "framer-motion";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import Login from "./pages/auth/Login";
-import Register from "./pages/auth/Register";
-import InfluencerDashboard from "./pages/dashboard/InfluencerDashboard";
-import BusinessDashboard from "./pages/dashboard/BusinessDashboard";
-import InfluencerProfile from "./pages/profile/InfluencerProfile";
-import BusinessProfile from "./pages/profile/BusinessProfile";
-import Influencers from "./pages/Influencers";
-import Businesses from "./pages/Businesses";
-import Messages from "./pages/Messages";
-import Profile from "./pages/Profile";
-
-// Create a new query client
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      staleTime: 30000,
-    },
-  },
-});
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner richColors closeButton position="top-right" />
-      <BrowserRouter>
-        <AnimatePresence mode="wait">
-          <Routes>
-            <Route path="/" element={<Index />} />
-            
-            {/* Authentication Routes */}
-            <Route path="/auth/login" element={<Login />} />
-            <Route path="/auth/register" element={<Register />} />
-            
-            {/* Dashboard Routes */}
-            <Route path="/dashboard/influencer" element={<InfluencerDashboard />} />
-            <Route path="/dashboard/business" element={<BusinessDashboard />} />
-            
-            {/* Profile Routes */}
-            <Route path="/influencer/:id" element={<InfluencerProfile />} />
-            <Route path="/business/:id" element={<BusinessProfile />} />
-            <Route path="/profile" element={<Profile />} />
-            
-            {/* Messaging Route */}
-            <Route path="/messages" element={<Messages />} />
-            <Route path="/messages/:id" element={<Messages />} />
-            
-            {/* Influencers and Businesses Listing Pages */}
-            <Route path="/influencers" element={<Influencers />} />
-            <Route path="/businesses" element={<Businesses />} />
-            
-            {/* How It Works page */}
-            <Route path="/how-it-works" element={<Navigate to="/" />} />
-            
-            {/* Catch-all Route */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AnimatePresence>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+function App() {
+  return (
+    <Router>
+      <div className="min-h-screen flex flex-col bg-zinc-900 text-gray-200">
+        <Header />
+        <main className="flex-grow">
+          <PageTransition>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/ai-matchmaking" element={<AIMatchmaking />} />
+              <Route path="/businesses" element={<Businesses />} />
+              <Route path="/influencers" element={<Influencers />} />
+              <Route path="/influencer/dashboard" element={<InfluencerDashboard />} />
+              <Route path="/business/dashboard" element={<BusinessDashboard />} />
+              <Route path="/messages" element={<Messages />} />
+              <Route path="/join" element={<Join />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/business/:id" element={<BusinessProfile />} />
+              <Route path="/learn" element={<Learn />} />
+            </Routes>
+          </PageTransition>
+        </main>
+        <Footer />
+        <Toaster />
+      </div>
+    </Router>
+  );
+}
 
 export default App;

@@ -1,27 +1,17 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Search, MessageSquare } from 'lucide-react';
-import { getConversations } from '@/lib/supabase';
-import { supabase } from '@/lib/supabase';
+import { mockMessagingService } from '@/services/mockMessaging';
+import { Message } from '@/services/mockData';
 
 interface User {
   id: number;
   name: string;
-  avatar?: string;
+  avatar: string;
   type: 'influencer' | 'business';
-}
-
-interface Message {
-  id: number;
-  sender_id: number;
-  receiver_id: number;
-  content: string;
-  sent_at: string;
-  read: boolean;
-  sender_type: 'influencer' | 'business';
+  isOnline?: boolean;
 }
 
 interface ConversationListProps {
@@ -42,179 +32,146 @@ const ConversationList: React.FC<ConversationListProps> = ({
   const [unreadCounts, setUnreadCounts] = useState<Record<number, number>>({});
 
   useEffect(() => {
-    const fetchConversations = async () => {
-      try {
-        const data = await getConversations(currentUser.id, currentUser.type);
-        setConversations(data || {});
+    // Get messages for each user
+    const fetchConversations = () => {
+      const newConversations: Record<string, Message[]> = {};
+      const newUnreadCounts: Record<number, number> = {};
+
+      users.forEach(user => {
+        const messages = mockMessagingService.getMessages(currentUser.id, user.id);
+        const convoKey = `${currentUser.type}-${user.id}`;
+        newConversations[convoKey] = messages;
         
-        // Calculate unread counts
-        const counts: Record<number, number> = {};
-        Object.entries(data || {}).forEach(([key, messages]) => {
-          const otherUserId = parseInt(key.split('-')[1]);
-          counts[otherUserId] = (messages as Message[]).filter(
-            msg => msg.sender_id !== currentUser.id && !msg.read
-          ).length;
-        });
-        setUnreadCounts(counts);
-        
-        // Set up realtime subscription for new messages
-        const channel = supabase
-          .channel('messages-channel')
-          .on('postgres_changes', 
-            { 
-              event: 'INSERT', 
-              schema: 'public', 
-              table: 'messages',
-              filter: `receiver_id=eq.${currentUser.id}`,
-            }, 
-            (payload) => {
-              const senderId = payload.new.sender_id;
-              
-              // Update unread count
-              setUnreadCounts(prev => ({
-                ...prev,
-                [senderId]: (prev[senderId] || 0) + 1
-              }));
-              
-              // Update conversations
-              setConversations(prev => {
-                const convoKey = `${currentUser.type}-${senderId}`;
-                const prevMsgs = prev[convoKey] || [];
-                return {
-                  ...prev,
-                  [convoKey]: [...prevMsgs, payload.new as Message]
-                };
-              });
-            }
-          )
-          .subscribe();
-        
-        return () => {
-          channel.unsubscribe();
-        };
-      } catch (error) {
-        console.error('Error fetching conversations:', error);
-      }
+        // Calculate unread count
+        newUnreadCounts[user.id] = messages.filter(
+          msg => msg.sender_id !== currentUser.id && !msg.read
+        ).length;
+      });
+
+      setConversations(newConversations);
+      setUnreadCounts(newUnreadCounts);
     };
-    
+
     fetchConversations();
-  }, [currentUser.id, currentUser.type]);
-  
-  // Filter users based on search query
-  const filteredUsers = users.filter(user => 
-    user.id !== currentUser.id && 
-    (searchQuery === '' || user.name.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
-  
-  // Sort users with conversations at the top
-  const sortedUsers = [...filteredUsers].sort((a, b) => {
-    const aHasConvo = conversations[`${currentUser.type}-${a.id}`] !== undefined;
-    const bHasConvo = conversations[`${currentUser.type}-${b.id}`] !== undefined;
-    
-    if (aHasConvo && !bHasConvo) return -1;
-    if (!aHasConvo && bHasConvo) return 1;
-    return 0;
-  });
-  
+
+    // Subscribe to new messages
+    const unsubscribe = mockMessagingService.subscribeToMessages((message) => {
+      if (message.sender_id === currentUser.id || message.receiver_id === currentUser.id) {
+        const otherUserId = message.sender_id === currentUser.id ? message.receiver_id : message.sender_id;
+        const convoKey = `${currentUser.type}-${otherUserId}`;
+        
+        setConversations(prev => ({
+          ...prev,
+          [convoKey]: [...(prev[convoKey] || []), message]
+        }));
+
+        if (message.sender_id !== currentUser.id && !message.read) {
+          setUnreadCounts(prev => ({
+            ...prev,
+            [message.sender_id]: (prev[message.sender_id] || 0) + 1
+          }));
+        }
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [currentUser.id, currentUser.type, users]);
+
   const getLastMessage = (userId: number) => {
     const convoKey = `${currentUser.type}-${userId}`;
-    const convo = conversations[convoKey];
-    if (!convo || convo.length === 0) return null;
-    
-    return convo[convo.length - 1];
+    const messages = conversations[convoKey] || [];
+    return messages[messages.length - 1];
   };
-  
+
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
-    
-    if (date.toDateString() === now.toDateString()) {
-      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const diff = now.getTime() - date.getTime();
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+    if (hours > 24) {
+      return date.toLocaleDateString();
+    } else if (hours > 0) {
+      return `${hours}h ago`;
+    } else {
+      return `${minutes}m ago`;
     }
-    
-    if (date.getFullYear() === now.getFullYear()) {
-      return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
-    }
-    
-    return date.toLocaleDateString([], { year: 'numeric', month: 'short', day: 'numeric' });
   };
-  
+
+  const filteredUsers = users.filter(user =>
+    user.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <div className="h-full bg-zinc-900 border-r border-zinc-800">
-      <div className="p-3 border-b border-zinc-800">
-        <h2 className="text-lg font-semibold mb-3 text-gray-200">Messages</h2>
+    <div className="h-full flex flex-col bg-zinc-900">
+      <div className="p-4 border-b border-zinc-800">
         <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
           <Input
+            placeholder="Search conversations..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search conversations..."
-            className="pl-9 bg-zinc-800 border-zinc-700 text-gray-200 placeholder:text-gray-500"
+            className="pl-9"
           />
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={16} />
         </div>
       </div>
-      
-      <div className="overflow-y-auto h-[calc(100%-60px)]">
-        {sortedUsers.length > 0 ? (
-          sortedUsers.map((user) => {
-            const lastMessage = getLastMessage(user.id);
-            const unreadCount = unreadCounts[user.id] || 0;
-            
-            return (
-              <motion.div
-                key={user.id}
-                whileHover={{ backgroundColor: 'rgba(255,255,255,0.05)' }}
-                className={`p-3 cursor-pointer border-b border-zinc-800/50 ${
-                  selectedUserId === user.id ? 'bg-zinc-800/50' : ''
-                }`}
-                onClick={() => {
-                  onSelectUser(user);
-                  // Reset unread count when selecting user
-                  if (unreadCount > 0) {
-                    setUnreadCounts(prev => ({ ...prev, [user.id]: 0 }));
-                  }
-                }}
-              >
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage src={user.avatar} alt={user.name} />
-                    <AvatarFallback className="bg-primary/10 text-primary">{user.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  
-                  <div className="flex-grow min-w-0">
-                    <div className="flex justify-between items-center">
-                      <h3 className="font-medium truncate text-gray-200">{user.name}</h3>
-                      {lastMessage && (
-                        <span className="text-xs text-gray-400">
-                          {formatTime(lastMessage.sent_at)}
-                        </span>
-                      )}
-                    </div>
-                    
-                    <div className="flex justify-between items-center">
-                      <p className="text-sm truncate text-gray-400 max-w-[180px]">
-                        {lastMessage 
-                          ? lastMessage.content 
-                          : `Start chatting with ${user.name}`}
+
+      <div className="flex-1 overflow-y-auto">
+        {filteredUsers.map((user) => {
+          const lastMessage = getLastMessage(user.id);
+          const unreadCount = unreadCounts[user.id] || 0;
+
+          return (
+            <motion.button
+              key={user.id}
+              onClick={() => onSelectUser(user)}
+              className={`w-full p-4 flex items-center gap-3 hover:bg-zinc-800 transition-colors ${
+                selectedUserId === user.id ? 'bg-zinc-800' : ''
+              }`}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <div className="relative">
+                <Avatar>
+                  <AvatarImage src={user.avatar} alt={user.name} />
+                  <AvatarFallback>{user.name[0]}</AvatarFallback>
+                </Avatar>
+                {user.isOnline && (
+                  <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-zinc-900" />
+                )}
+              </div>
+              <div className="flex-1 text-left">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-medium">{user.name}</h3>
+                  {lastMessage && (
+                    <span className="text-xs text-gray-400">
+                      {formatTime(lastMessage.sent_at)}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  {lastMessage ? (
+                    <>
+                      <p className="text-sm text-gray-400 truncate">
+                        {lastMessage.content}
                       </p>
-                      
                       {unreadCount > 0 && (
-                        <span className="bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                        <span className="bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full">
                           {unreadCount}
                         </span>
                       )}
-                    </div>
-                  </div>
+                    </>
+                  ) : (
+                    <p className="text-sm text-gray-400">No messages yet</p>
+                  )}
                 </div>
-              </motion.div>
-            );
-          })
-        ) : (
-          <div className="p-4 text-center text-gray-400">
-            <MessageSquare className="mx-auto mb-2 text-gray-500" size={32} />
-            <p>No conversations found</p>
-          </div>
-        )}
+              </div>
+            </motion.button>
+          );
+        })}
       </div>
     </div>
   );

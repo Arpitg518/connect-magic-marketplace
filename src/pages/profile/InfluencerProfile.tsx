@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { 
@@ -17,8 +17,17 @@ import {
   Star, 
   Briefcase, 
   Flag,
-  BarChart3
+  BarChart3,
+  ThumbsUp,
+  ThumbsDown,
+  Send,
+  X
 } from 'lucide-react';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -152,14 +161,102 @@ const mockInfluencer = {
       author: 'Jessica Park',
       role: 'Brand Manager'
     }
+  ],
+  workBrief: {
+    description: "I specialize in creating engaging content for lifestyle, fashion, and beauty brands. My content style is authentic, relatable, and focuses on storytelling. I have experience with product reviews, sponsored posts, and long-term brand partnerships.",
+    preferredContentTypes: ["Instagram Posts", "Instagram Stories", "YouTube Videos", "TikTok Videos"],
+    preferredIndustries: ["Fashion", "Beauty", "Lifestyle", "Wellness"],
+    contentCreationProcess: [
+      "Initial consultation to understand brand goals",
+      "Content strategy development",
+      "Creative content production",
+      "Engagement monitoring and optimization",
+      "Performance reporting"
+    ],
+    averageDeliveryTime: "3-5 business days",
+    minimumCampaignDuration: "1 month"
+  },
+  reviews: [
+    {
+      id: 1,
+      user: {
+        name: "John Smith",
+        avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=80&h=80&q=80",
+        role: "Brand Manager"
+      },
+      rating: 5,
+      comment: "Excellent work! The content was engaging and drove significant engagement.",
+      date: "2024-02-15",
+      likes: 12,
+      dislikes: 0
+    },
+    {
+      id: 2,
+      user: {
+        name: "Sarah Johnson",
+        avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&auto=format&fit=crop&w=80&h=80&q=80",
+        role: "Marketing Director"
+      },
+      rating: 4,
+      comment: "Great communication and professional delivery.",
+      date: "2024-02-10",
+      likes: 8,
+      dislikes: 1
+    }
   ]
 };
 
 const InfluencerProfile: React.FC = () => {
+  const [showReviewDialog, setShowReviewDialog] = useState(false);
+  const [showMessageDialog, setShowMessageDialog] = useState(false);
+  const [newReview, setNewReview] = useState({ rating: 5, comment: '' });
+  const [message, setMessage] = useState('');
+  const [reviews, setReviews] = useState(mockInfluencer.reviews);
+
   // Scroll to top on page load
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  const handleReviewSubmit = () => {
+    const review = {
+      id: reviews.length + 1,
+      user: {
+        name: "Current User",
+        avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=80&h=80&q=80",
+        role: "Brand"
+      },
+      rating: newReview.rating,
+      comment: newReview.comment,
+      date: new Date().toISOString().split('T')[0],
+      likes: 0,
+      dislikes: 0
+    };
+    setReviews([review, ...reviews]);
+    setNewReview({ rating: 5, comment: '' });
+    setShowReviewDialog(false);
+  };
+
+  const handleReviewLike = (reviewId: number) => {
+    setReviews(reviews.map(review => 
+      review.id === reviewId 
+        ? { ...review, likes: review.likes + 1 }
+        : review
+    ));
+  };
+
+  const handleReviewDislike = (reviewId: number) => {
+    setReviews(reviews.map(review => 
+      review.id === reviewId 
+        ? { ...review, dislikes: review.dislikes + 1 }
+        : review
+    ));
+  };
+
+  const influencer = mockInfluencer;
+  if (!influencer) {
+    return <div>Influencer not found</div>;
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -170,7 +267,7 @@ const InfluencerProfile: React.FC = () => {
         <div className="relative h-64 md:h-80 lg:h-96 overflow-hidden">
           <div className="absolute inset-0">
             <img 
-              src={mockInfluencer.backgroundImage} 
+              src={influencer.backgroundImage} 
               alt="Profile cover" 
               className="w-full h-full object-cover"
             />
@@ -202,11 +299,10 @@ const InfluencerProfile: React.FC = () => {
                 <div className="flex flex-col items-center md:items-start">
                   <div className="relative -mt-24 md:-mt-28 mb-4">
                     <div className="w-28 h-28 md:w-36 md:h-36 rounded-full border-4 border-white overflow-hidden shadow-lg">
-                      <img 
-                        src={mockInfluencer.avatar} 
-                        alt={mockInfluencer.name} 
-                        className="w-full h-full object-cover"
-                      />
+                      <Avatar className="h-28 w-28 md:h-36 md:w-36 rounded-full border-4 border-white overflow-hidden shadow-lg">
+                        <AvatarImage src={influencer.avatar} alt={influencer.name} />
+                        <AvatarFallback>{influencer.name[0]}</AvatarFallback>
+                      </Avatar>
                     </div>
                     <div className="absolute bottom-0 right-0 bg-primary text-white rounded-full p-1.5 border-2 border-white">
                       <CheckCircle size={18} className="fill-white" />
@@ -215,33 +311,33 @@ const InfluencerProfile: React.FC = () => {
                   
                   <div className="text-center md:text-left">
                     <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
-                      <h1 className="text-2xl font-bold">{mockInfluencer.name}</h1>
+                      <h1 className="text-2xl font-bold">{influencer.name}</h1>
                       <span className="bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full font-medium">
-                        {mockInfluencer.verificationLevel}
+                        {influencer.verificationLevel}
                       </span>
                     </div>
-                    <p className="text-foreground/70 mb-3">{mockInfluencer.username}</p>
+                    <p className="text-foreground/70 mb-3">{influencer.username}</p>
                     
                     <div className="flex items-center justify-center md:justify-start gap-2 mb-4">
                       <div className="flex items-center">
                         <Star size={16} className="text-yellow-400 fill-yellow-400 mr-1" />
-                        <span className="font-medium">{mockInfluencer.rating}</span>
-                        <span className="text-foreground/60 text-sm ml-1">({mockInfluencer.reviews})</span>
+                        <span className="font-medium">{influencer.rating}</span>
+                        <span className="text-foreground/60 text-sm ml-1">({influencer.reviews})</span>
                       </div>
                       <span className="text-foreground/40">•</span>
                       <div className="flex items-center">
                         <Briefcase size={16} className="text-foreground/60 mr-1" />
-                        <span>{mockInfluencer.completedCampaigns} campaigns</span>
+                        <span>{influencer.completedCampaigns} campaigns</span>
                       </div>
                     </div>
                     
                     <div className="flex items-center justify-center md:justify-start text-foreground/70 mb-4">
                       <MapPin size={16} className="mr-1" />
-                      <span>{mockInfluencer.location}</span>
+                      <span>{influencer.location}</span>
                     </div>
                     
                     <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-6">
-                      {mockInfluencer.categories.map((category, index) => (
+                      {influencer.categories.map((category, index) => (
                         <span 
                           key={index} 
                           className="bg-secondary text-foreground/80 text-sm px-3 py-1 rounded-full"
@@ -252,7 +348,7 @@ const InfluencerProfile: React.FC = () => {
                     </div>
                     
                     <div className="flex items-center justify-center md:justify-start gap-3">
-                      {mockInfluencer.socialMedia.map((social, index) => (
+                      {influencer.socialMedia.map((social, index) => (
                         <a 
                           key={index}
                           href={social.link}
@@ -271,32 +367,32 @@ const InfluencerProfile: React.FC = () => {
                 {/* Bio & Action Buttons */}
                 <div className="flex-grow">
                   <p className="text-foreground/80 mb-6">
-                    {mockInfluencer.bio}
+                    {influencer.bio}
                   </p>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div className="p-4 bg-secondary/30 rounded-lg">
                       <div className="flex items-center justify-between">
                         <span className="text-foreground/70">Audience Size</span>
-                        <span className="font-medium">{mockInfluencer.socialMedia[0].followers}</span>
+                        <span className="font-medium">{influencer.socialMedia[0].followers}</span>
                       </div>
                     </div>
                     <div className="p-4 bg-secondary/30 rounded-lg">
                       <div className="flex items-center justify-between">
                         <span className="text-foreground/70">Avg. Engagement</span>
-                        <span className="font-medium">{mockInfluencer.socialMedia[0].engagement}%</span>
+                        <span className="font-medium">{influencer.socialMedia[0].engagement}%</span>
                       </div>
                     </div>
                     <div className="p-4 bg-secondary/30 rounded-lg">
                       <div className="flex items-center justify-between">
                         <span className="text-foreground/70">Price Range</span>
-                        <span className="font-medium">{mockInfluencer.priceRange}</span>
+                        <span className="font-medium">{influencer.priceRange}</span>
                       </div>
                     </div>
                     <div className="p-4 bg-secondary/30 rounded-lg">
                       <div className="flex items-center justify-between">
                         <span className="text-foreground/70">Languages</span>
-                        <span className="font-medium">{mockInfluencer.languages.join(', ')}</span>
+                        <span className="font-medium">{influencer.languages.join(', ')}</span>
                       </div>
                     </div>
                   </div>
@@ -314,17 +410,176 @@ const InfluencerProfile: React.FC = () => {
             </motion.div>
           </div>
           
-          {/* Social Platform Statistics */}
+          {/* Work Brief Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
             className="mb-8"
           >
+            <h2 className="text-2xl font-bold mb-4">Work Brief</h2>
+            
+            <div className="bg-white rounded-xl shadow-card border border-border/30 p-6">
+              <div className="space-y-6">
+                <div>
+                  <h3 className="font-medium mb-2">About My Work</h3>
+                  <p className="text-foreground/80">{influencer.workBrief.description}</p>
+                </div>
+                
+                <div>
+                  <h3 className="font-medium mb-2">Preferred Content Types</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {influencer.workBrief.preferredContentTypes.map((type, index) => (
+                      <span key={index} className="bg-secondary/30 text-foreground/80 px-3 py-1 rounded-full text-sm">
+                        {type}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="font-medium mb-2">Industries I Work With</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {influencer.workBrief.preferredIndustries.map((industry, index) => (
+                      <span key={index} className="bg-secondary/30 text-foreground/80 px-3 py-1 rounded-full text-sm">
+                        {industry}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="font-medium mb-2">Content Creation Process</h3>
+                  <ul className="list-disc list-inside space-y-1 text-foreground/80">
+                    {influencer.workBrief.contentCreationProcess.map((step, index) => (
+                      <li key={index}>{step}</li>
+                    ))}
+                  </ul>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-secondary/30 p-4 rounded-lg">
+                    <h3 className="font-medium mb-1">Average Delivery Time</h3>
+                    <p className="text-foreground/80">{influencer.workBrief.averageDeliveryTime}</p>
+                  </div>
+                  <div className="bg-secondary/30 p-4 rounded-lg">
+                    <h3 className="font-medium mb-1">Minimum Campaign Duration</h3>
+                    <p className="text-foreground/80">{influencer.workBrief.minimumCampaignDuration}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+          
+          {/* Reviews Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="mb-8"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold">Reviews</h2>
+              <Dialog open={showReviewDialog} onOpenChange={setShowReviewDialog}>
+                <DialogTrigger asChild>
+                  <Button variant="outline">Write a Review</Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Write a Review</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Rating</label>
+                      <div className="flex gap-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button
+                            key={star}
+                            onClick={() => setNewReview({ ...newReview, rating: star })}
+                            className="text-yellow-400 hover:text-yellow-500"
+                          >
+                            <Star
+                              size={24}
+                              className={star <= newReview.rating ? 'fill-current' : ''}
+                            />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Your Review</label>
+                      <Textarea
+                        value={newReview.comment}
+                        onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
+                        placeholder="Share your experience..."
+                        className="min-h-[100px]"
+                      />
+                    </div>
+                    <Button onClick={handleReviewSubmit}>Submit Review</Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+            
+            <div className="space-y-6">
+              {reviews.map((review) => (
+                <div
+                  key={review.id}
+                  className="bg-white rounded-xl shadow-card border border-border/30 p-6"
+                >
+                  <div className="flex items-start gap-4 mb-4">
+                    <Avatar className="w-12 h-12">
+                      <AvatarImage src={review.user.avatar} alt={review.user.name} />
+                      <AvatarFallback>{review.user.name[0]}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <h3 className="font-medium">{review.user.name}</h3>
+                      <p className="text-sm text-foreground/70">{review.user.role}</p>
+                      <div className="flex items-center mt-1">
+                        {[...Array(review.rating)].map((_, i) => (
+                          <Star key={i} size={14} className="text-yellow-400 fill-yellow-400" />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <p className="text-foreground/80 mb-4">{review.comment}</p>
+                  
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-foreground/60">{review.date}</span>
+                    <div className="flex items-center gap-4">
+                      <button
+                        onClick={() => handleReviewLike(review.id)}
+                        className="flex items-center gap-1 text-green-500 hover:text-green-600"
+                      >
+                        <ThumbsUp size={16} />
+                        <span>{review.likes}</span>
+                      </button>
+                      <button
+                        onClick={() => handleReviewDislike(review.id)}
+                        className="flex items-center gap-1 text-red-500 hover:text-red-600"
+                      >
+                        <ThumbsDown size={16} />
+                        <span>{review.dislikes}</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+          
+          {/* Social Platform Statistics */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="mb-8"
+          >
             <h2 className="text-2xl font-bold mb-4">Social Platforms</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {mockInfluencer.socialMedia.map((platform, index) => (
+              {influencer.socialMedia.map((platform, index) => (
                 <div 
                   key={index}
                   className="bg-white rounded-xl shadow-card border border-border/30 p-5 hover:shadow-prominent transition-all duration-300"
@@ -371,18 +626,18 @@ const InfluencerProfile: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
             className="mb-8"
           >
             <div className="flex items-end justify-between mb-4">
               <h2 className="text-2xl font-bold">Featured Content</h2>
-              <Link to={`/influencer/${mockInfluencer.id}/content`} className="text-primary text-sm font-medium">
+              <Link to={`/influencer/${influencer.id}/content`} className="text-primary text-sm font-medium">
                 View all content
               </Link>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {mockInfluencer.featuredContent.map((content) => (
+              {influencer.featuredContent.map((content) => (
                 <div 
                   key={content.id}
                   className="bg-white rounded-xl shadow-card border border-border/30 overflow-hidden hover:shadow-prominent transition-all duration-300"
@@ -431,14 +686,14 @@ const InfluencerProfile: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
             className="mb-8"
           >
             <h2 className="text-2xl font-bold mb-4">Previous Brand Collaborations</h2>
             
             <div className="bg-white rounded-xl shadow-card border border-border/30 p-6">
               <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12">
-                {mockInfluencer.brands.map((brand, index) => (
+                {influencer.brands.map((brand, index) => (
                   <div key={index} className="w-16 h-16 rounded-lg overflow-hidden border border-border">
                     <img 
                       src={brand} 
@@ -455,12 +710,12 @@ const InfluencerProfile: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
           >
             <h2 className="text-2xl font-bold mb-4">Testimonials</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {mockInfluencer.testimonials.map((testimonial) => (
+              {influencer.testimonials.map((testimonial) => (
                 <div 
                   key={testimonial.id}
                   className="bg-white rounded-xl shadow-card border border-border/30 p-6"
@@ -499,6 +754,38 @@ const InfluencerProfile: React.FC = () => {
               ))}
             </div>
           </motion.div>
+          
+          {/* Message Dialog */}
+          <Dialog open={showMessageDialog} onOpenChange={setShowMessageDialog}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Message {influencer.name}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Your Message</label>
+                  <Textarea
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Write your message..."
+                    className="min-h-[150px]"
+                  />
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={() => setShowMessageDialog(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={() => {
+                    // Handle message sending
+                    setMessage('');
+                    setShowMessageDialog(false);
+                  }}>
+                    Send Message
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </main>
       

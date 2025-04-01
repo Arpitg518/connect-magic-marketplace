@@ -1,135 +1,176 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Check, Star, Heart, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { Users, TrendingUp, MapPin, Instagram, Youtube, Twitter, Star } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
-export interface InfluencerCardProps {
+// Custom TikTok icon
+const TikTokIcon = () => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    width="16" 
+    height="16" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+    className="lucide lucide-tiktok"
+  >
+    <path d="M9 12a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/>
+    <path d="M15 8a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
+    <path d="M15 8v8a4 4 0 0 1-4 4"/>
+    <path d="M15 8h-4"/>
+  </svg>
+);
+
+interface InfluencerCardProps {
   id: number;
   name: string;
-  image: string;
-  category: string;
   followers: number;
-  platform: string;
-  platformIcon: React.ReactNode;
+  engagement: number;
+  category: string;
   city: string;
+  coordinates: {
+    lat: number;
+    lng: number;
+  };
+  profileImage: string;
+  socialLinks: {
+    instagram?: string;
+    youtube?: string;
+    tiktok?: string;
+    twitter?: string;
+  };
   tags?: string[];
-  engagement?: number;
-  verified?: boolean;
   bio?: string;
 }
 
 const InfluencerCard: React.FC<InfluencerCardProps> = ({
   id,
   name,
-  image,
-  category,
   followers,
-  platform,
-  platformIcon,
-  city,
-  tags,
   engagement,
-  verified = false,
+  category,
+  city,
+  profileImage,
+  socialLinks,
+  tags,
   bio
 }) => {
-  // Format the follower count
-  const formatFollowers = (count: number): string => {
-    if (count >= 1000000) {
-      return (count / 1000000).toFixed(1) + 'M';
-    } else if (count >= 1000) {
-      return (count / 1000).toFixed(1) + 'K';
-    }
-    return count.toString();
-  };
-
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="relative bg-white rounded-2xl overflow-hidden shadow-card border border-border/30 h-[440px]"
+      className="group"
     >
-      <div className="relative h-[280px] overflow-hidden">
-        <img 
-          src={image} 
-          alt={name}
-          className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-        
-        {/* Follower count badge */}
-        <div className="absolute top-4 right-4 bg-black/40 backdrop-blur-sm text-white text-xs font-medium py-1 px-2 rounded-full flex items-center">
-          {platformIcon}
-          <span className="ml-1">{formatFollowers(followers)} followers</span>
-        </div>
-        
-        {/* Verified badge */}
-        {verified && (
-          <div className="absolute top-4 left-4 bg-primary/10 backdrop-blur-sm text-white text-xs font-medium py-1 px-2 rounded-full flex items-center">
-            <Check size={12} className="mr-1" />
-            Verified
+      <Card className="overflow-hidden h-full hover:shadow-lg transition-all duration-300 border-2 hover:border-primary/20">
+        <div className="h-48 bg-gradient-to-br from-primary/90 via-primary/80 to-primary relative overflow-hidden">
+          <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
+          <div className="absolute bottom-0 left-0 w-full p-4 pb-0">
+            <div className="w-24 h-24 rounded-full border-4 border-white overflow-hidden bg-white shadow-lg transform group-hover:scale-105 transition-transform duration-300">
+              <img 
+                src={profileImage} 
+                alt={name}
+                className="w-full h-full object-cover"
+              />
+            </div>
           </div>
-        )}
-        
-        {/* City tag */}
-        <div className="absolute bottom-4 left-4 bg-white/20 backdrop-blur-sm text-white text-xs font-medium py-1 px-2 rounded-full">
-          {city}
-        </div>
-        
-        {/* Engagement rate if available */}
-        {engagement && (
-          <div className="absolute bottom-4 right-4 bg-white/20 backdrop-blur-sm text-white text-xs font-medium py-1 px-2 rounded-full flex items-center">
-            <Star size={12} className="mr-1 fill-yellow-400 text-yellow-400" />
-            {engagement}% Engagement
-          </div>
-        )}
-      </div>
-      
-      <div className="p-4">
-        <div className="flex justify-between items-start mb-2">
-          <div>
-            <h3 className="text-xl font-semibold mb-1">{name}</h3>
-            <p className="text-sm text-foreground/70">{category}</p>
+          <div className="absolute top-4 right-4 flex items-center gap-1 bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full">
+            <Star size={14} className="text-yellow-400 fill-yellow-400" />
+            <span className="text-white text-sm font-medium">{engagement}%</span>
           </div>
         </div>
-        
-        {/* Tags */}
-        {tags && tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 my-2">
-            {tags.map((tag, index) => (
-              <span 
-                key={index} 
-                className="text-xs bg-secondary text-foreground/70 px-2 py-0.5 rounded-full"
-              >
-                #{tag}
-              </span>
+        <CardContent className="pt-6">
+          <div className="mb-4">
+            <h3 className="font-semibold text-xl group-hover:text-primary transition-colors">{name}</h3>
+            <div className="flex items-center text-sm text-foreground/70 mt-1">
+              <MapPin size={12} className="mr-1 text-primary" />
+              <span>{city}</span>
+            </div>
+          </div>
+          
+          <div className="flex flex-wrap gap-2 mb-4">
+            <Badge variant="secondary" className="font-normal bg-primary/10 text-primary hover:bg-primary/20">
+              {category}
+            </Badge>
+            {tags?.map((tag, index) => (
+              <Badge key={index} variant="outline" className="font-normal hover:bg-primary/5">
+                {tag}
+              </Badge>
             ))}
           </div>
-        )}
-        
-        {/* Bio */}
-        {bio && (
-          <p className="text-sm text-foreground/70 line-clamp-2 mb-3">{bio}</p>
-        )}
-        
-        {/* Action buttons */}
-        <div className="flex justify-between mt-2 pt-2 border-t border-border/30">
-          <button className="w-12 h-12 rounded-full bg-red-100 text-red-500 flex items-center justify-center hover:bg-red-200 transition-colors">
-            <X size={24} />
-          </button>
           
-          <Link to={`/influencer/${id}`} className="py-2 px-4 bg-primary/10 text-primary rounded-full text-sm font-medium hover:bg-primary/20 transition-colors">
-            View Profile
-          </Link>
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="bg-gradient-to-br from-primary/5 to-primary/10 p-3 rounded-lg border border-primary/10">
+              <div className="flex items-center text-xs text-foreground/70 mb-1">
+                <Users size={12} className="mr-1 text-primary" />
+                <span>Followers</span>
+              </div>
+              <p className="text-sm font-medium">{formatNumber(followers)}</p>
+            </div>
+            <div className="bg-gradient-to-br from-primary/5 to-primary/10 p-3 rounded-lg border border-primary/10">
+              <div className="flex items-center text-xs text-foreground/70 mb-1">
+                <TrendingUp size={12} className="mr-1 text-primary" />
+                <span>Engagement</span>
+              </div>
+              <p className="text-sm font-medium">{engagement}%</p>
+            </div>
+          </div>
           
-          <button className="w-12 h-12 rounded-full bg-green-100 text-green-500 flex items-center justify-center hover:bg-green-200 transition-colors">
-            <Heart size={24} />
-          </button>
-        </div>
-      </div>
+          {bio && (
+            <p className="text-sm text-foreground/70 mb-4 line-clamp-2">
+              {bio}
+            </p>
+          )}
+          
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              {socialLinks.instagram && (
+                <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="text-pink-600 hover:text-pink-800 transition-colors">
+                  <Instagram size={18} />
+                </a>
+              )}
+              {socialLinks.youtube && (
+                <a href={socialLinks.youtube} target="_blank" rel="noopener noreferrer" className="text-red-600 hover:text-red-800 transition-colors">
+                  <Youtube size={18} />
+                </a>
+              )}
+              {socialLinks.tiktok && (
+                <a href={socialLinks.tiktok} target="_blank" rel="noopener noreferrer" className="text-black hover:text-gray-800 transition-colors">
+                  <TikTokIcon />
+                </a>
+              )}
+              {socialLinks.twitter && (
+                <a href={socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-700 transition-colors">
+                  <Twitter size={18} />
+                </a>
+              )}
+            </div>
+            <Link to={`/influencer/${id}`}>
+              <Button variant="outline" size="sm" className="hover:bg-primary hover:text-white transition-colors">
+                View Profile
+              </Button>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
     </motion.div>
   );
+};
+
+// Helper function to format numbers (e.g., 1500000 -> 1.5M)
+const formatNumber = (num: number): string => {
+  if (num >= 1000000) {
+    return (num / 1000000).toFixed(1) + 'M';
+  } else if (num >= 1000) {
+    return (num / 1000).toFixed(1) + 'K';
+  }
+  return num.toString();
 };
 
 export default InfluencerCard;

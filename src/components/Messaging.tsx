@@ -1,30 +1,13 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, UserCircle2, Phone, Video, MoreVertical, ChevronLeft } from 'lucide-react';
+import { Send, UserCircle2, Phone, Video, MoreVertical, ChevronLeft, Paperclip, Image as ImageIcon, File } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { getMessagesBetweenUsers, sendMessage, markMessagesAsRead, supabase } from '@/lib/supabase';
-
-interface Message {
-  id: number;
-  sender_id: number;
-  receiver_id: number;
-  content: string;
-  sent_at: string;
-  read: boolean;
-  sender_type: 'influencer' | 'business';
-}
-
-interface User {
-  id: number;
-  name: string;
-  avatar?: string;
-  type: 'influencer' | 'business';
-}
+import { mockMessagingService } from '@/services/mockMessaging';
+import { User, Message } from '@/services/mockData';
 
 interface MessagingProps {
   currentUser: User;
@@ -37,45 +20,42 @@ const Messaging: React.FC<MessagingProps> = ({ currentUser, receiver, onBack, cl
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const [isReceiverTyping, setIsReceiverTyping] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout>();
   
   useEffect(() => {
-    const fetchMessages = async () => {
-      try {
-        const data = await getMessagesBetweenUsers(currentUser.id, receiver.id);
-        setMessages(data || []);
-        
-        // Mark received messages as read
-        await markMessagesAsRead(currentUser.id, receiver.id);
-        
-        // Set up realtime subscription for new messages
-        const channel = supabase
-          .channel('messages-realtime')
-          .on('postgres_changes', 
-            { 
-              event: 'INSERT', 
-              schema: 'public', 
-              table: 'messages',
-              filter: `receiver_id=eq.${currentUser.id}`,
-            }, 
-            async (payload) => {
-              if (payload.new.sender_id === receiver.id) {
-                setMessages(prev => [...prev, payload.new as Message]);
-                await markMessagesAsRead(currentUser.id, receiver.id);
-              }
-            }
-          )
-          .subscribe();
-        
-        return () => {
-          channel.unsubscribe();
-        };
-      } catch (error) {
-        console.error('Error fetching messages:', error);
-      }
-    };
+    // Get initial messages
+    const initialMessages = mockMessagingService.getMessages(currentUser.id, receiver.id);
+    setMessages(initialMessages);
     
-    fetchMessages();
+    // Mark received messages as read
+    mockMessagingService.markMessagesAsRead(currentUser.id, receiver.id);
+    
+    // Subscribe to new messages
+    const unsubscribeMessages = mockMessagingService.subscribeToMessages((message) => {
+      if (message.sender_id === receiver.id || message.receiver_id === receiver.id) {
+        setMessages(prev => [...prev, message]);
+        if (message.sender_id === receiver.id) {
+          mockMessagingService.markMessagesAsRead(currentUser.id, receiver.id);
+        }
+      }
+    });
+
+    // Subscribe to typing status
+    const unsubscribeTyping = mockMessagingService.subscribeToTypingStatus((userId, isTyping) => {
+      if (userId === receiver.id) {
+        setIsReceiverTyping(isTyping);
+      }
+    });
+    
+    return () => {
+      unsubscribeMessages();
+      unsubscribeTyping();
+    };
   }, [currentUser.id, receiver.id]);
   
   useEffect(() => {
@@ -83,44 +63,112 @@ const Messaging: React.FC<MessagingProps> = ({ currentUser, receiver, onBack, cl
     endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
   
+  const handleTyping = () => {
+    if (!isTyping) {
+      setIsTyping(true);
+      mockMessagingService.subscribeToTypingStatus((userId, isTyping) => {
+        if (userId === currentUser.id) {
+          setIsTyping(isTyping);
+        }
+      });
+    }
+
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    typingTimeoutRef.current = setTimeout(() => {
+      setIsTyping(false);
+      mockMessagingService.subscribeToTypingStatus((userId, isTyping) => {
+        if (userId === currentUser.id) {
+          setIsTyping(isTyping);
+        }
+      });
+    }, 1000);
+  };
+  
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() && !selectedFile) return;
     
     setLoading(true);
     
     try {
-      await sendMessage(
+      let fileUrl = null;
+      if (selectedFile) {
+        // In a real app, this would upload to a storage service
+        fileUrl = URL.createObjectURL(selectedFile);
+      }
+      
+      const message = mockMessagingService.sendMessage(
         currentUser.id,
         receiver.id,
         newMessage.trim(),
-        currentUser.type
+        currentUser.type,
+        fileUrl,
+        selectedFile?.type
       );
       
-      // Add message to UI immediately
-      const tempMessage: Message = {
-        id: Date.now(),
-        sender_id: currentUser.id,
-        receiver_id: receiver.id,
-        content: newMessage.trim(),
-        sent_at: new Date().toISOString(),
-        read: false,
-        sender_type: currentUser.type
-      };
-      
-      setMessages(prev => [...prev, tempMessage]);
+      setMessages(prev => [...prev, message]);
       setNewMessage('');
+      setSelectedFile(null);
     } catch (error) {
       console.error('Error sending message:', error);
     } finally {
       setLoading(false);
     }
   };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
+    }
+  };
   
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const renderMessageContent = (message: Message) => {
+    if (message.file_url) {
+      if (message.file_type?.startsWith('image/')) {
+        return (
+          <div className="relative group">
+            <img 
+              src={message.file_url}
+              alt="Shared image"
+              className="max-w-[300px] rounded-lg"
+            />
+            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+              <a 
+                href={message.file_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white hover:text-primary"
+              >
+                <ImageIcon size={24} />
+              </a>
+            </div>
+          </div>
+        );
+      }
+      return (
+        <div className="flex items-center gap-2 p-2 bg-zinc-800 rounded-lg">
+          <File size={24} className="text-primary" />
+          <a 
+            href={message.file_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline"
+          >
+            Download File
+          </a>
+        </div>
+      );
+    }
+    return <p>{message.content}</p>;
   };
   
   return (
@@ -141,7 +189,12 @@ const Messaging: React.FC<MessagingProps> = ({ currentUser, receiver, onBack, cl
           </Avatar>
           <div>
             <h3 className="font-medium text-gray-200">{receiver.name}</h3>
-            <p className="text-xs text-gray-400 capitalize">{receiver.type}</p>
+            <p className="text-xs text-gray-400 capitalize">
+              {receiver.type}
+              {receiver.isOnline && (
+                <span className="ml-1 text-green-500">• Online</span>
+              )}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-1">
@@ -176,7 +229,7 @@ const Messaging: React.FC<MessagingProps> = ({ currentUser, receiver, onBack, cl
                       : 'bg-zinc-800 text-gray-200 rounded-bl-none'
                   }`}
                 >
-                  <p>{message.content}</p>
+                  {renderMessageContent(message)}
                   <div 
                     className={`text-xs mt-1 ${
                       isCurrentUser ? 'text-primary-foreground/70' : 'text-gray-400'
@@ -191,6 +244,13 @@ const Messaging: React.FC<MessagingProps> = ({ currentUser, receiver, onBack, cl
               </motion.div>
             );
           })}
+          {isReceiverTyping && (
+            <div className="flex justify-start">
+              <div className="bg-zinc-800 rounded-lg px-4 py-2 text-sm text-gray-400">
+                Typing...
+              </div>
+            </div>
+          )}
           <div ref={endOfMessagesRef} />
         </div>
       </ScrollArea>
@@ -198,9 +258,43 @@ const Messaging: React.FC<MessagingProps> = ({ currentUser, receiver, onBack, cl
       {/* Input */}
       <form onSubmit={handleSendMessage} className="p-3 border-t border-zinc-800 bg-zinc-900">
         <div className="flex items-center gap-2">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileSelect}
+            className="hidden"
+            accept="image/*,.pdf,.doc,.docx,.txt"
+          />
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => fileInputRef.current?.click()}
+            className="text-gray-400 hover:text-primary"
+          >
+            <Paperclip size={20} />
+          </Button>
+          {selectedFile && (
+            <div className="flex items-center gap-2 text-sm text-gray-400">
+              <File size={16} />
+              <span>{selectedFile.name}</span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => setSelectedFile(null)}
+                className="text-gray-400 hover:text-red-500"
+              >
+                ×
+              </Button>
+            </div>
+          )}
           <Input
             value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
+            onChange={(e) => {
+              setNewMessage(e.target.value);
+              handleTyping();
+            }}
             placeholder="Type a message..."
             className="flex-grow bg-zinc-800 border-zinc-700 text-gray-200 placeholder:text-gray-500"
             disabled={loading}
@@ -208,7 +302,7 @@ const Messaging: React.FC<MessagingProps> = ({ currentUser, receiver, onBack, cl
           <Button 
             type="submit" 
             size="icon"
-            disabled={loading || !newMessage.trim()}
+            disabled={loading || (!newMessage.trim() && !selectedFile)}
             className="bg-primary text-white hover:bg-primary/90"
           >
             <Send size={18} />

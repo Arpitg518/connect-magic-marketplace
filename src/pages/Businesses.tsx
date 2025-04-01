@@ -1,15 +1,12 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { Briefcase, Filter, Search, MapPin, MessageSquare, ArrowRight } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { indianBusinesses } from '@/data/indianInfluencers';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
+import { indianBusinesses } from '@/data/indianBusinesses';
 import PageTransition from '@/components/layout/PageTransition';
 import MapDiscovery from '@/components/MapDiscovery';
 
@@ -37,7 +34,7 @@ const Businesses = () => {
       : true;
     
     const matchesCity = selectedCity
-      ? business.city === selectedCity
+      ? business.location === selectedCity
       : true;
     
     return matchesSearch && matchesCategory && matchesCity;
@@ -57,8 +54,6 @@ const Businesses = () => {
   return (
     <PageTransition>
       <div className="min-h-screen flex flex-col bg-zinc-900 text-gray-200">
-        <Header />
-        
         <main className="flex-grow pb-16 pt-28">
           <div className="container mx-auto px-4">
             <section className="mb-10">
@@ -68,8 +63,8 @@ const Businesses = () => {
                 transition={{ duration: 0.5 }}
                 className="mb-8"
               >
-                <h1 className="text-3xl font-bold mb-2">Discover Businesses</h1>
-                <p className="text-gray-400">Connect with brands looking for influencer partnerships across India</p>
+                <h1 className="text-3xl font-bold mb-2 text-white">Discover Businesses</h1>
+                <p className="text-gray-300">Connect with brands looking for influencer partnerships across India</p>
               </motion.div>
               
               <motion.div
@@ -107,10 +102,10 @@ const Businesses = () => {
                       
                       <Button 
                         variant="outline"
-                        className="flex items-center justify-center gap-2 border-zinc-700 text-gray-200 hover:bg-zinc-700"
+                        className="flex items-center justify-center gap-2 border-zinc-700 text-white hover:bg-zinc-700"
                         onClick={() => setShowMap(!showMap)}
                       >
-                        <MapPin size={18} />
+                        <MapPin size={18} className="text-white" />
                         <span>{showMap ? 'Hide Map' : 'Show Map'}</span>
                       </Button>
                     </div>
@@ -205,7 +200,7 @@ const Businesses = () => {
                 transition={{ duration: 0.5, delay: 0.3 }}
               >
                 <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-xl font-semibold text-gray-200">
+                  <h2 className="text-xl font-semibold text-white">
                     Businesses ({filteredBusinesses.length})
                   </h2>
                 </div>
@@ -232,10 +227,10 @@ const Businesses = () => {
                                 </div>
                                 
                                 <div>
-                                  <h3 className="font-semibold text-lg text-gray-200">{business.name}</h3>
-                                  <div className="flex items-center text-sm text-gray-400">
+                                  <h3 className="font-semibold text-lg text-white">{business.name}</h3>
+                                  <div className="flex items-center text-sm text-gray-300">
                                     <MapPin size={12} className="mr-1" />
-                                    <span>{business.city}</span>
+                                    <span>{business.location}</span>
                                   </div>
                                 </div>
                               </div>
@@ -244,36 +239,39 @@ const Businesses = () => {
                                 <Badge variant="secondary" className="mb-3 bg-zinc-700 text-gray-200">
                                   {business.category}
                                 </Badge>
-                                <p className="text-sm text-gray-300 line-clamp-3">{business.description}</p>
+                                <p className="text-sm text-gray-200 line-clamp-3">{business.description}</p>
                               </div>
                               
                               <div className="space-y-2 pt-2">
-                                <p className="text-sm font-medium text-gray-300">Looking for:</p>
+                                <p className="text-sm font-medium text-gray-200">Looking for:</p>
                                 <div className="flex flex-wrap gap-1">
-                                  {business.lookingFor.map((tag, index) => (
-                                    <Badge key={index} variant="outline" className="font-normal border-zinc-700 text-gray-300">
-                                      {tag}
+                                  {business.marketingGoals.map((goal, index) => (
+                                    <Badge key={index} variant="outline" className="font-normal border-zinc-600 bg-zinc-700/50 text-white">
+                                      {goal}
                                     </Badge>
                                   ))}
                                 </div>
                               </div>
                               
                               <div className="pt-2">
-                                <p className="text-sm text-gray-400">
-                                  Budget: <span className="text-gray-200">₹{business.budget.replace('$', '')}</span>
+                                <p className="text-sm text-gray-300">
+                                  Budget: <span className="text-white">₹{business.budget.preferred.toLocaleString()}</span>
                                 </p>
                               </div>
                               
                               <div className="flex gap-2 pt-2">
                                 <Button 
-                                  className="flex-grow"
-                                  onClick={() => navigate(`/business/${business.id}`)}
+                                  variant="outline" 
+                                  className="w-full"
+                                  asChild
                                 >
-                                  View Profile
+                                  <Link to={`/business/${business.id}`}>
+                                    View Profile
+                                  </Link>
                                 </Button>
                                 <Button 
                                   variant="outline" 
-                                  className="border-zinc-700 hover:bg-zinc-700"
+                                  className="border-zinc-700 hover:bg-zinc-700 text-white"
                                   onClick={() => navigate(`/messages?user=${business.id}&type=business`)}
                                 >
                                   <MessageSquare size={16} />
@@ -286,7 +284,7 @@ const Businesses = () => {
                     ))
                   ) : (
                     <div className="col-span-full text-center py-12 bg-zinc-800 rounded-xl border border-zinc-700/30">
-                      <p className="text-lg text-gray-400 mb-4">No businesses found matching your criteria</p>
+                      <p className="text-lg text-gray-300 mb-4">No businesses found matching your criteria</p>
                       <Button 
                         onClick={clearFilters}
                         variant="outline" 
@@ -301,8 +299,6 @@ const Businesses = () => {
             </section>
           </div>
         </main>
-        
-        <Footer />
       </div>
     </PageTransition>
   );

@@ -1,44 +1,60 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, Mail, Lock, ArrowLeft } from 'lucide-react';
+import { mockAuthService } from '@/services/mockAuth';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
 
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
-const Login = () => {
+const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
   
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
-    // Basic validation
-    if (!email || !password) {
-      setError('Please fill in all fields');
-      return;
-    }
-    
-    // Simulate login process
     setIsLoading(true);
-    
-    // This is a mock implementation. In a real app, you would call your auth API here.
-    setTimeout(() => {
+
+    try {
+      const response = await mockAuthService.login(formData);
+      
+      if (response.error) {
+        toast.error(response.error);
+        return;
+      }
+
+      toast.success('Login successful!');
+      navigate('/');
+    } catch (error) {
+      toast.error('An error occurred during login');
+    } finally {
       setIsLoading(false);
-      // Navigate to dashboard (this is just for demo - you'd navigate based on user type in a real app)
-      navigate('/dashboard');
-    }, 1500);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-zinc-900">
       <Header />
       
       <main className="flex-grow flex items-center justify-center py-16 px-4">
@@ -48,18 +64,18 @@ const Login = () => {
           transition={{ duration: 0.5 }}
           className="w-full max-w-md"
         >
-          <div className="bg-white rounded-xl shadow-card border border-border/30 overflow-hidden">
+          <div className="bg-zinc-800 rounded-xl shadow-card border border-zinc-700 overflow-hidden">
             <div className="p-8">
               {/* Header */}
               <div className="text-center mb-8">
-                <h1 className="text-2xl font-bold mb-2">Welcome back</h1>
-                <p className="text-foreground/70">Sign in to your account</p>
+                <h1 className="text-2xl font-bold mb-2 text-white">Welcome back</h1>
+                <p className="text-zinc-300">Sign in to your account</p>
               </div>
               
               {/* Social Login Buttons */}
               <div className="mb-6">
                 <button 
-                  className="w-full flex items-center justify-center gap-2 border border-border rounded-md py-2.5 px-4 text-foreground font-medium mb-3 hover:bg-secondary/50 transition-colors"
+                  className="w-full flex items-center justify-center gap-2 border border-zinc-700 rounded-md py-2.5 px-4 text-white font-medium mb-3 hover:bg-zinc-700 transition-colors"
                 >
                   <svg className="w-5 h-5" viewBox="0 0 24 24">
                     <path
@@ -85,80 +101,72 @@ const Login = () => {
               
               {/* Divider */}
               <div className="flex items-center mb-6">
-                <div className="flex-grow h-px bg-border"></div>
-                <span className="px-3 text-foreground/60 text-sm">or</span>
-                <div className="flex-grow h-px bg-border"></div>
+                <div className="flex-grow h-px bg-zinc-700"></div>
+                <span className="px-3 text-zinc-400 text-sm">or</span>
+                <div className="flex-grow h-px bg-zinc-700"></div>
               </div>
               
               {/* Login Form */}
-              <form onSubmit={handleLogin}>
+              <form onSubmit={handleSubmit} className="mt-8 space-y-6">
                 {error && (
-                  <div className="mb-4 p-3 bg-destructive/10 text-destructive rounded-md text-sm">
+                  <div className="mb-4 p-3 bg-red-500/10 text-red-400 rounded-md text-sm">
                     {error}
                   </div>
                 )}
                 
-                <div className="space-y-4 mb-6">
+                <div className="space-y-4">
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-foreground/80 mb-1.5">
+                    <label htmlFor="email" className="block text-sm font-medium text-zinc-300 mb-1.5">
                       Email
                     </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Mail size={18} className="text-foreground/50" />
-                      </div>
-                      <input
-                        id="email"
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="input-primary pl-10"
-                        placeholder="name@example.com"
-                        required
-                      />
-                    </div>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      required
+                      value={formData.email}
+                      onChange={handleChange}
+                      className="input-primary pl-10 bg-zinc-700 border-zinc-600 text-white placeholder-zinc-400"
+                      placeholder="name@example.com"
+                    />
                   </div>
                   
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
-                      <label htmlFor="password" className="block text-sm font-medium text-foreground/80">
+                      <label htmlFor="password" className="block text-sm font-medium text-zinc-300">
                         Password
                       </label>
-                      <Link to="/auth/forgot-password" className="text-sm text-primary hover:underline">
+                      <Link to="/auth/forgot-password" className="text-sm text-primary hover:text-primary/80">
                         Forgot password?
                       </Link>
                     </div>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Lock size={18} className="text-foreground/50" />
-                      </div>
-                      <input
-                        id="password"
-                        type={showPassword ? "text" : "password"}
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="input-primary pl-10 pr-10"
-                        placeholder="••••••••"
-                        required
-                      />
-                      <button
-                        type="button"
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        {showPassword ? (
-                          <EyeOff size={18} className="text-foreground/50" />
-                        ) : (
-                          <Eye size={18} className="text-foreground/50" />
-                        )}
-                      </button>
-                    </div>
+                    <Input
+                      id="password"
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      required
+                      value={formData.password}
+                      onChange={handleChange}
+                      className="input-primary pl-10 pr-10 bg-zinc-700 border-zinc-600 text-white placeholder-zinc-400"
+                      placeholder="••••••••"
+                    />
+                    <button
+                      type="button"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <EyeOff size={18} className="text-zinc-400" />
+                      ) : (
+                        <Eye size={18} className="text-zinc-400" />
+                      )}
+                    </button>
                   </div>
                 </div>
                 
-                <button
+                <Button
                   type="submit"
-                  className="w-full btn-primary py-2.5"
+                  className="w-full bg-primary hover:bg-primary/90 text-white py-2.5"
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -172,14 +180,14 @@ const Login = () => {
                   ) : (
                     'Sign in'
                   )}
-                </button>
+                </Button>
               </form>
               
               {/* Sign up link */}
               <div className="mt-6 text-center">
-                <p className="text-foreground/70">
+                <p className="text-zinc-300">
                   Don't have an account?{' '}
-                  <Link to="/auth/register" className="text-primary font-medium hover:underline">
+                  <Link to="/auth/register" className="text-primary font-medium hover:text-primary/80">
                     Sign up
                   </Link>
                 </p>
@@ -189,7 +197,7 @@ const Login = () => {
           
           {/* Back to home */}
           <div className="mt-8 text-center">
-            <Link to="/" className="inline-flex items-center text-foreground/70 hover:text-primary">
+            <Link to="/" className="inline-flex items-center text-zinc-300 hover:text-primary">
               <ArrowLeft size={16} className="mr-1" />
               Back to home
             </Link>

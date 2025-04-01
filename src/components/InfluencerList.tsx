@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Users, TrendingUp, MapPin, Instagram, Youtube, Twitter } from 'lucide-react';
+import { Users, TrendingUp, MapPin, Instagram, Youtube, Twitter, CheckCircle, Check } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -31,21 +30,39 @@ const TikTokIcon = () => (
 interface Influencer {
   id: number;
   name: string;
-  followers: number;
-  engagement: number;
   category: string;
   city: string;
-  coordinates: {
-    lat: number;
-    lng: number;
-  };
-  profileImage: string;
+  state: string;
+  country: string;
+  rating: number;
+  followers: number;
+  price: number;
+  image: string;
+  description: string;
+  tags: string[];
+  languages: string[];
+  availability: string;
   socialLinks: {
     instagram?: string;
     youtube?: string;
-    tiktok?: string;
     twitter?: string;
   };
+  portfolio: {
+    title: string;
+    description: string;
+    metrics: {
+      views: number;
+      engagement: number;
+    };
+  }[];
+  reviews: {
+    id: number;
+    rating: number;
+    comment: string;
+    author: string;
+    date: string;
+  }[];
+  verified: boolean;
 }
 
 interface InfluencerListProps {
@@ -53,13 +70,36 @@ interface InfluencerListProps {
 }
 
 const InfluencerList: React.FC<InfluencerListProps> = ({ influencers }) => {
+  const [sortBy, setSortBy] = React.useState<'followers' | 'engagement' | 'name'>('followers');
+  const [sortedInfluencers, setSortedInfluencers] = React.useState<Influencer[]>(influencers);
+
+  React.useEffect(() => {
+    const sorted = [...influencers].sort((a, b) => {
+      switch (sortBy) {
+        case 'followers':
+          return b.followers - a.followers;
+        case 'engagement':
+          return b.rating - a.rating;
+        case 'name':
+          return a.name.localeCompare(b.name);
+        default:
+          return 0;
+      }
+    });
+    setSortedInfluencers(sorted);
+  }, [influencers, sortBy]);
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Influencers ({influencers.length})</h2>
+        <h2 className="text-xl font-semibold text-white">Influencers ({sortedInfluencers.length})</h2>
         <div className="flex items-center gap-2">
-          <span className="text-sm text-foreground/70">Sort by:</span>
-          <select className="text-sm bg-white border border-border/50 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary/30">
+          <span className="text-sm text-gray-300">Sort by:</span>
+          <select 
+            className="text-sm bg-zinc-800 border border-zinc-700 text-white rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary/30"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as 'followers' | 'engagement' | 'name')}
+          >
             <option value="followers">Followers: High to Low</option>
             <option value="engagement">Engagement: High to Low</option>
             <option value="name">Name: A to Z</option>
@@ -67,89 +107,117 @@ const InfluencerList: React.FC<InfluencerListProps> = ({ influencers }) => {
         </div>
       </div>
 
-      {influencers.length === 0 ? (
-        <div className="bg-white rounded-xl p-8 text-center">
-          <h3 className="text-lg font-medium mb-2">No influencers found</h3>
-          <p className="text-foreground/70">Try adjusting your search criteria or clear filters.</p>
+      {sortedInfluencers.length === 0 ? (
+        <div className="bg-zinc-800 rounded-xl p-8 text-center">
+          <h3 className="text-lg font-medium mb-2 text-white">No influencers found</h3>
+          <p className="text-gray-300">Try adjusting your search criteria or clear filters.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {influencers.map((influencer, index) => (
+          {sortedInfluencers.map((influencer, index) => (
             <motion.div
               key={influencer.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: index * 0.05 }}
             >
-              <Card className="overflow-hidden h-full hover:shadow-md transition-shadow">
+              <Card className="overflow-hidden h-full hover:shadow-md transition-shadow bg-zinc-800 border-zinc-700">
                 <div className="h-40 bg-gradient-to-r from-primary/80 to-primary relative">
                   <div className="absolute bottom-0 left-0 w-full p-4 pb-0">
-                    <div className="w-20 h-20 rounded-full border-4 border-white overflow-hidden bg-white">
-                      <img 
-                        src={influencer.profileImage} 
-                        alt={influencer.name}
-                        className="w-full h-full object-cover"
-                      />
+                    <div className="flex items-center gap-4">
+                      <div className="relative">
+                        <img
+                          src={influencer.image}
+                          alt={influencer.name}
+                          className="w-16 h-16 rounded-full object-cover border-2 border-primary/20"
+                          loading="lazy"
+                          onError={(e) => {
+                            console.error('Image failed to load:', influencer.image);
+                            e.currentTarget.src = "https://i.pravatar.cc/150?img=1";
+                          }}
+                        />
+                        {influencer.verified && (
+                          <div className="absolute -bottom-1 -right-1 bg-primary rounded-full p-1">
+                            <Check size={12} className="text-white" />
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold">{influencer.name}</h3>
+                        <p className="text-sm text-gray-400">{influencer.category}</p>
+                      </div>
                     </div>
                   </div>
                 </div>
                 <CardContent className="pt-4">
                   <div className="mb-4">
-                    <h3 className="font-semibold text-lg">{influencer.name}</h3>
-                    <div className="flex items-center text-sm text-foreground/70 mt-1">
+                    <div className="flex items-center text-sm text-gray-300 mt-1">
                       <MapPin size={12} className="mr-1" />
                       <span>{influencer.city}</span>
                     </div>
                   </div>
                   
                   <div className="flex flex-wrap gap-2 mb-4">
-                    <Badge variant="secondary" className="font-normal">
+                    <Badge variant="secondary" className="font-normal bg-zinc-700 text-white">
                       {influencer.category}
                     </Badge>
                   </div>
                   
                   <div className="grid grid-cols-2 gap-2 mb-4">
-                    <div className="bg-secondary/30 p-2 rounded-md">
-                      <div className="flex items-center text-xs text-foreground/70">
+                    <div className="bg-zinc-700/50 p-2 rounded-md">
+                      <div className="flex items-center text-xs text-gray-300">
                         <Users size={12} className="mr-1" />
                         <span>Followers</span>
                       </div>
-                      <p className="text-sm font-medium">{formatNumber(influencer.followers)}</p>
+                      <p className="text-sm font-medium text-white">{formatNumber(influencer.followers)}</p>
                     </div>
-                    <div className="bg-secondary/30 p-2 rounded-md">
-                      <div className="flex items-center text-xs text-foreground/70">
+                    <div className="bg-zinc-700/50 p-2 rounded-md">
+                      <div className="flex items-center text-xs text-gray-300">
                         <TrendingUp size={12} className="mr-1" />
                         <span>Engagement</span>
                       </div>
-                      <p className="text-sm font-medium">{influencer.engagement}%</p>
+                      <p className="text-sm font-medium text-white">{influencer.rating}%</p>
                     </div>
                   </div>
                   
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2">
-                      {influencer.socialLinks.instagram && (
-                        <a href={influencer.socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="text-pink-600 hover:text-pink-800">
-                          <Instagram size={16} />
-                        </a>
-                      )}
-                      {influencer.socialLinks.youtube && (
-                        <a href={influencer.socialLinks.youtube} target="_blank" rel="noopener noreferrer" className="text-red-600 hover:text-red-800">
-                          <Youtube size={16} />
-                        </a>
-                      )}
-                      {influencer.socialLinks.tiktok && (
-                        <a href={influencer.socialLinks.tiktok} target="_blank" rel="noopener noreferrer" className="text-black hover:text-gray-800">
-                          <TikTokIcon />
-                        </a>
-                      )}
-                      {influencer.socialLinks.twitter && (
-                        <a href={influencer.socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-700">
-                          <Twitter size={16} />
-                        </a>
-                      )}
+                      {Object.entries(influencer.socialLinks).map(([platform, url]) => {
+                        if (url) {
+                          switch (platform.toLowerCase()) {
+                            case 'instagram':
+                              return (
+                                <a key={platform} href={url} target="_blank" rel="noopener noreferrer" className="text-pink-400 hover:text-pink-300">
+                                  <Instagram size={16} />
+                                </a>
+                              );
+                            case 'youtube':
+                              return (
+                                <a key={platform} href={url} target="_blank" rel="noopener noreferrer" className="text-red-400 hover:text-red-300">
+                                  <Youtube size={16} />
+                                </a>
+                              );
+                            case 'tiktok':
+                              return (
+                                <a key={platform} href={url} target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white">
+                                  <TikTokIcon />
+                                </a>
+                              );
+                            case 'twitter':
+                              return (
+                                <a key={platform} href={url} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300">
+                                  <Twitter size={16} />
+                                </a>
+                              );
+                            default:
+                              return null;
+                          }
+                        }
+                        return null;
+                      })}
                     </div>
                     <Link to={`/influencer/${influencer.id}`}>
-                      <Button variant="outline" size="sm">View Profile</Button>
+                      <Button variant="outline" size="sm" className="border-zinc-700 text-white hover:bg-zinc-700">View Profile</Button>
                     </Link>
                   </div>
                 </CardContent>

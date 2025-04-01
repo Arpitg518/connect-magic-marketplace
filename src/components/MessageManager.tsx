@@ -1,198 +1,102 @@
-
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
-import ConversationList from './ConversationList';
+import { User } from '@/services/mockData';
+import { mockMessagingService } from '@/services/mockMessaging';
 import Messaging from './Messaging';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { indianInfluencers, indianBusinesses } from '@/data/indianInfluencers';
-import { MessageSquare, ChevronLeft } from 'lucide-react';
-
-interface User {
-  id: number;
-  name: string;
-  avatar?: string;
-  type: 'influencer' | 'business';
-}
 
 interface MessageManagerProps {
   currentUser: User;
-  className?: string;
 }
 
-const MessageManager: React.FC<MessageManagerProps> = ({ currentUser, className }) => {
+const MessageManager: React.FC<MessageManagerProps> = ({ currentUser }) => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [isMobileView, setIsMobileView] = useState(window.innerWidth < 768);
-  const [showConversations, setShowConversations] = useState(true);
-  const navigate = useNavigate();
+  const [availableUsers, setAvailableUsers] = useState<User[]>([]);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
-  // Combine influencers and businesses for the user list
-  const allUsers: User[] = [
-    ...indianInfluencers.map(inf => ({
-      id: inf.id,
-      name: inf.name,
-      avatar: inf.profileImage,
-      type: 'influencer' as const
-    })),
-    ...indianBusinesses.map(bus => ({
-      id: bus.id,
-      name: bus.name,
-      avatar: bus.logo,
-      type: 'business' as const
-    }))
-  ];
-  
-  // Filter out the current user from the list
-  const availableUsers = allUsers.filter(user => 
-    !(user.id === currentUser.id && user.type === currentUser.type)
-  );
-
-  // Handle window resize
   useEffect(() => {
+    // Get available users
+    const users = mockMessagingService.getUsers(currentUser.id);
+    setAvailableUsers(users);
+
+    // Subscribe to online status changes
+    const unsubscribeOnlineStatus = mockMessagingService.subscribeToOnlineStatus(
+      (userId, isOnline) => {
+        setAvailableUsers(prevUsers =>
+          prevUsers.map(user =>
+            user.id === userId ? { ...user, isOnline } : user
+          )
+        );
+      }
+    );
+
+    // Update current user's online status
+    mockMessagingService.updateOnlineStatus(currentUser.id, true);
+
+    // Handle window resize
     const handleResize = () => {
-      const isMobile = window.innerWidth < 768;
-      setIsMobileView(isMobile);
-      if (!isMobile) {
-        setShowConversations(true);
-      }
+      setIsMobile(window.innerWidth < 768);
     };
-    
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-  
-  // Check URL parameters for initialization
-  useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const userId = searchParams.get('user');
-    const userType = searchParams.get('type');
-    
-    if (userId && userType) {
-      const user = allUsers.find(u => 
-        u.id === parseInt(userId) && u.type === userType
-      );
-      
-      if (user) {
-        setSelectedUser(user);
-        if (isMobileView) {
-          setShowConversations(false);
-        }
-      }
-    }
-  }, [allUsers]);
-  
-  // Handle selecting a user
-  const handleSelectUser = (user: User) => {
+
+    return () => {
+      unsubscribeOnlineStatus();
+      window.removeEventListener('resize', handleResize);
+      mockMessagingService.updateOnlineStatus(currentUser.id, false);
+    };
+  }, [currentUser.id]);
+
+  const handleUserSelect = (user: User) => {
     setSelectedUser(user);
-    if (isMobileView) {
-      setShowConversations(false);
-    }
   };
-  
-  // Handle back button on mobile
-  const handleBack = () => {
-    setShowConversations(true);
-  };
-  
+
   return (
-    <div className={`flex h-full ${className || ''}`}>
-      {/* Mobile view: Show either conversations or messages */}
-      {isMobileView ? (
-        <>
-          {showConversations ? (
-            <motion.div
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              className="w-full h-full"
+    <div className="h-full flex flex-col md:flex-row bg-zinc-900 rounded-lg overflow-hidden">
+      {/* Conversation List */}
+      <div className={`w-full md:w-80 border-r border-zinc-800 flex flex-col ${isMobile && selectedUser ? 'hidden' : 'block'}`}>
+        <div className="p-4 border-b border-zinc-800">
+          <h2 className="text-lg font-semibold">Messages</h2>
+        </div>
+        <div className="flex-1 overflow-y-auto">
+          {availableUsers.map((user) => (
+            <button
+              key={user.id}
+              onClick={() => handleUserSelect(user)}
+              className={`w-full p-4 flex items-center gap-3 hover:bg-zinc-800 transition-colors ${
+                selectedUser?.id === user.id ? 'bg-zinc-800' : ''
+              }`}
             >
-              <ConversationList
-                currentUser={currentUser}
-                users={availableUsers}
-                onSelectUser={handleSelectUser}
-                selectedUserId={selectedUser?.id}
-              />
-            </motion.div>
-          ) : (
-            <motion.div
-              initial={{ x: 20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              className="w-full h-full"
-            >
-              {selectedUser ? (
-                <Messaging
-                  currentUser={currentUser}
-                  receiver={selectedUser}
-                  onBack={handleBack}
+              <div className="relative">
+                <img
+                  src={user.avatar}
+                  alt={user.name}
+                  className="w-10 h-10 rounded-full"
                 />
-              ) : (
-                <div className="h-full flex items-center justify-center p-4 bg-zinc-900 text-gray-400">
-                  <div className="text-center">
-                    <MessageSquare className="mx-auto mb-3" size={48} />
-                    <h3 className="text-xl font-medium mb-2 text-gray-300">No conversation selected</h3>
-                    <p>Select a conversation to start messaging</p>
-                    <Button 
-                      variant="outline" 
-                      className="mt-4"
-                      onClick={handleBack}
-                    >
-                      <ChevronLeft size={16} className="mr-2" />
-                      Back to conversations
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </motion.div>
-          )}
-        </>
-      ) : (
-        // Desktop view: Show both conversations and messages
-        <>
-          <div className="w-1/3 h-full">
-            <ConversationList
-              currentUser={currentUser}
-              users={availableUsers}
-              onSelectUser={handleSelectUser}
-              selectedUserId={selectedUser?.id}
-            />
-          </div>
-          
-          <div className="w-2/3 h-full">
-            {selectedUser ? (
-              <Messaging
-                currentUser={currentUser}
-                receiver={selectedUser}
-              />
-            ) : (
-              <div className="h-full flex items-center justify-center p-4 bg-zinc-900 text-gray-400 border-l border-zinc-800">
-                <div className="text-center max-w-md">
-                  <MessageSquare className="mx-auto mb-3" size={48} />
-                  <h3 className="text-xl font-medium mb-2 text-gray-300">Select a conversation</h3>
-                  <p>Choose a contact from the list to start messaging</p>
-                  <p className="mt-4 text-sm">
-                    Can't find who you're looking for? 
-                    <Button 
-                      variant="link" 
-                      className="text-primary p-0 h-auto mx-1"
-                      onClick={() => navigate('/influencers')}
-                    >
-                      Browse influencers
-                    </Button>
-                    or
-                    <Button 
-                      variant="link" 
-                      className="text-primary p-0 h-auto mx-1"
-                      onClick={() => navigate('/businesses')}
-                    >
-                      Browse businesses
-                    </Button>
-                  </p>
-                </div>
+                {user.isOnline && (
+                  <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-zinc-900" />
+                )}
               </div>
-            )}
+              <div className="flex-1 text-left">
+                <h3 className="font-medium">{user.name}</h3>
+                <p className="text-sm text-gray-400 capitalize">{user.type}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Messaging Interface */}
+      <div className={`flex-1 ${isMobile && !selectedUser ? 'hidden' : 'block'}`}>
+        {selectedUser ? (
+          <Messaging
+            currentUser={currentUser}
+            receiver={selectedUser}
+            onBack={isMobile ? () => setSelectedUser(null) : undefined}
+          />
+        ) : (
+          <div className="h-full flex items-center justify-center text-gray-400">
+            Select a conversation to start messaging
           </div>
-        </>
-      )}
+        )}
+      </div>
     </div>
   );
 };
