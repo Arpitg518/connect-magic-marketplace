@@ -19,7 +19,7 @@ export const matchInfluencerWithBusiness = async (
   const reasoning: string[] = [];
   const suggestedCollaborations: string[] = [];
 
-    // Category match
+  // Category match
   if (influencer.category.toLowerCase().includes(business.category.toLowerCase())) {
     matchScore += 30;
     reasoning.push("Perfect category alignment between influencer and business");
@@ -34,8 +34,8 @@ export const matchInfluencerWithBusiness = async (
     reasoning.push("Strong thematic alignment between influencer's content and business's target audience");
   }
     
-    // Location match
-  if (influencer.location === business.location) {
+  // Location match
+  if (influencer.city === business.location) {
     matchScore += 10;
     reasoning.push("Same location enables better collaboration opportunities");
   }
@@ -58,9 +58,9 @@ export const matchInfluencerWithBusiness = async (
   }
 
   // Content style match
-  const styleMatch = influencer.contentTypes.some(type =>
+  const styleMatch = influencer.tags.some(tag =>
     business.preferences.contentStyle.some(style =>
-      type.toLowerCase().includes(style.toLowerCase())
+      tag.toLowerCase().includes(style.toLowerCase())
     )
   );
   if (styleMatch) {
