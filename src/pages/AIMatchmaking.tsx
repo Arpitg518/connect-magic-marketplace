@@ -91,44 +91,16 @@ const AIMatchmaking: React.FC = () => {
           </div>
 
           {/* Search and Filters */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <div className="md:col-span-2">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                <Input
-                  placeholder="Search businesses or influencers..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 bg-zinc-900 border-zinc-800"
-                />
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mb-8">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+              <Input
+                placeholder="Search businesses or influencers..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 bg-zinc-900 border-zinc-800"
+              />
             </div>
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="bg-zinc-900 border-zinc-800">
-                <SelectValue placeholder="Category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">All Categories</SelectItem>
-                {categories.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-              <SelectTrigger className="bg-zinc-900 border-zinc-800">
-                <SelectValue placeholder="Location" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">All Locations</SelectItem>
-                {locations.map((location) => (
-                  <SelectItem key={location} value={location}>
-                    {location}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
 
           {/* Find Matches Button */}
@@ -165,8 +137,8 @@ const AIMatchmaking: React.FC = () => {
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div>
-                        <h3 className="text-xl font-semibold mb-1">{match.business.name}</h3>
-                        <p className="text-gray-400 text-sm">{match.business.category}</p>
+                        <h3 className="text-xl font-semibold text-white mb-1">{match.business.name}</h3>
+                        <p className="text-gray-300 text-sm">{match.business.category}</p>
                       </div>
                       <Badge className="bg-green-500/20 text-green-400">
                         {match.matchScore}% Match
@@ -174,11 +146,11 @@ const AIMatchmaking: React.FC = () => {
                     </div>
 
                     <div className="flex items-center gap-4 mb-4">
-                      <div className="flex items-center text-sm text-gray-400">
+                      <div className="flex items-center text-sm text-gray-300">
                         <Building2 size={16} className="mr-1" />
                         <span>{match.business.location}</span>
                       </div>
-                      <div className="flex items-center text-sm text-gray-400">
+                      <div className="flex items-center text-sm text-gray-300">
                         <Target size={16} className="mr-1" />
                         <span>{match.business.industry}</span>
                       </div>
@@ -193,11 +165,11 @@ const AIMatchmaking: React.FC = () => {
                           className="w-12 h-12 rounded-full object-cover"
                         />
                         <div>
-                          <h4 className="font-medium">{match.influencer.name}</h4>
-                          <p className="text-sm text-gray-400">{match.influencer.category}</p>
+                          <h4 className="font-medium text-white">{match.influencer.name}</h4>
+                          <p className="text-sm text-gray-300">{match.influencer.category}</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-4 text-sm text-gray-400">
+                      <div className="flex items-center gap-4 text-sm text-gray-300">
                         <div className="flex items-center">
                           <Users size={16} className="mr-1" />
                           <span>{match.influencer.followers.toLocaleString()} followers</span>
@@ -210,8 +182,8 @@ const AIMatchmaking: React.FC = () => {
                     </div>
 
                     <div className="border-t border-zinc-800 pt-4 mb-4">
-                      <h4 className="text-sm font-medium text-gray-300 mb-2">Match Reasoning:</h4>
-                      <ul className="list-disc list-inside text-sm text-gray-400 space-y-1">
+                      <h4 className="text-sm font-medium text-white mb-2">Match Reasoning:</h4>
+                      <ul className="list-disc list-inside text-sm text-gray-300 space-y-1">
                         {match.reasoning.slice(0, 3).map((reason, idx) => (
                           <li key={idx}>{reason}</li>
                         ))}
@@ -219,10 +191,14 @@ const AIMatchmaking: React.FC = () => {
                     </div>
 
                     <div className="border-t border-zinc-800 pt-4">
-                      <h4 className="text-sm font-medium text-gray-300 mb-2">Suggested Collaborations:</h4>
-                      <div className="flex flex-wrap gap-2">
+                      <h4 className="text-sm font-medium text-white mb-2">Suggested Collaborations:</h4>
+                      <div className="flex flex-wrap gap-2 bg-zinc-800/30 p-3 rounded-lg">
                         {match.suggestedCollaborations.slice(0, 2).map((collab, idx) => (
-                          <Badge key={idx} variant="outline" className="border-zinc-700">
+                          <Badge 
+                            key={idx} 
+                            variant="outline" 
+                            className="border-zinc-600 bg-zinc-700/50 text-white hover:bg-zinc-700/70 transition-colors"
+                          >
                             {collab}
                           </Badge>
                         ))}
@@ -230,10 +206,10 @@ const AIMatchmaking: React.FC = () => {
                     </div>
 
                     <div className="mt-4 flex gap-2">
-                      <Button variant="outline" className="flex-1">
+                      <Button variant="outline" className="flex-1 border-zinc-700 hover:bg-zinc-800 text-white">
                         View Details
                       </Button>
-                      <Button className="flex-1">
+                      <Button className="flex-1 bg-primary hover:bg-primary/90">
                         Start Collaborating
                       </Button>
                     </div>

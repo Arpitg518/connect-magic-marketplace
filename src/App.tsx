@@ -18,33 +18,40 @@ import InfluencerDashboard from '@/pages/InfluencerDashboard';
 import BusinessDashboard from '@/pages/BusinessDashboard';
 import PageTransition from '@/components/layout/PageTransition';
 import Learn from '@/pages/Learn';
+import PaymentSuccess from '@/pages/PaymentSuccess';
+import PaymentPage from '@/pages/PaymentPage';
+import { NotificationProvider } from '@/context/NotificationContext';
 
 function App() {
   return (
-    <Router>
-      <div className="min-h-screen flex flex-col bg-zinc-900 text-gray-200">
-        <Header />
-        <main className="flex-grow">
-          <PageTransition>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/ai-matchmaking" element={<AIMatchmaking />} />
-              <Route path="/businesses" element={<Businesses />} />
-              <Route path="/influencers" element={<Influencers />} />
-              <Route path="/influencer/dashboard" element={<InfluencerDashboard />} />
-              <Route path="/business/dashboard" element={<BusinessDashboard />} />
-              <Route path="/messages" element={<Messages />} />
-              <Route path="/join" element={<Join />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/business/:id" element={<BusinessProfile />} />
-              <Route path="/learn" element={<Learn />} />
-            </Routes>
-          </PageTransition>
-        </main>
-        <Footer />
-        <Toaster />
-      </div>
-    </Router>
+    <NotificationProvider>
+      <Router>
+        <div className="min-h-screen flex flex-col bg-zinc-900 text-gray-200">
+          <Header />
+          <main className="flex-grow">
+            <PageTransition>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/ai-matchmaking" element={<AIMatchmaking />} />
+                <Route path="/businesses" element={<Businesses />} />
+                <Route path="/influencers" element={<Influencers />} />
+                <Route path="/influencer/dashboard" element={<InfluencerDashboard />} />
+                <Route path="/business/dashboard" element={<BusinessDashboard />} />
+                <Route path="/messages" element={<Messages />} />
+                <Route path="/join" element={<Join />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/business/:id" element={<BusinessProfile />} />
+                <Route path="/learn" element={<Learn />} />
+                <Route path="/payment-success" element={<PaymentSuccess />} />
+                <Route path="/pricing" element={<PaymentPage />} />
+              </Routes>
+            </PageTransition>
+          </main>
+          <Footer />
+          <Toaster />
+        </div>
+      </Router>
+    </NotificationProvider>
   );
 }
 

@@ -1,11 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, Mail, Lock, User, Building2, ArrowLeft, Check, ChevronRight } from 'lucide-react';
-
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 
 type UserType = 'influencer' | 'business';
 
@@ -70,9 +66,7 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      
+    <div className="min-h-screen flex flex-col bg-zinc-900">
       <main className="flex-grow flex items-center justify-center py-16 px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -317,8 +311,6 @@ const Register = () => {
           </div>
         </motion.div>
       </main>
-      
-      <Footer />
     </div>
   );
 };

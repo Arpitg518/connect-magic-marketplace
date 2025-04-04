@@ -1,12 +1,22 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { MessageSquare } from 'lucide-react';
 import MessagingInterface from '@/components/MessagingInterface';
 import { mockUsers } from '@/services/mockData';
+import { useNotification } from '@/context/NotificationContext';
 
 const Messages: React.FC = () => {
+  const { showInfo } = useNotification();
+  const welcomeShownRef = useRef(false);
   // For demo purposes, we'll use the first business user as the current user
   const currentUser = mockUsers.find(user => user.type === 'business');
+
+  const handleInitialLoad = () => {
+    if (!welcomeShownRef.current && currentUser) {
+      showInfo('Welcome to your messages! You can start chatting with your connections.');
+      welcomeShownRef.current = true;
+    }
+  };
 
   if (!currentUser) {
     return (
@@ -32,7 +42,10 @@ const Messages: React.FC = () => {
         </div>
       </motion.div>
 
-      <MessagingInterface currentUserId={currentUser.id} />
+      <MessagingInterface 
+        currentUserId={currentUser.id} 
+        onInitialLoad={handleInitialLoad}
+      />
     </div>
   );
 };

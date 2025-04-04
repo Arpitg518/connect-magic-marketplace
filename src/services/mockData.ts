@@ -84,7 +84,7 @@ export const mockUsers: User[] = [
     name: 'Mike Chen',
     email: 'mike@example.com',
     type: 'influencer',
-    avatar: 'https://www.pexels.com/photo/woman-wearing-black-and-white-striped-top-2064824/',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
     bio: 'Tech reviewer and gadget enthusiast. Making technology accessible to everyone.',
     location: 'Bangalore',
     categories: ['Technology', 'Gaming'],
@@ -202,6 +202,27 @@ export const mockUsers: User[] = [
       projects: 22,
       clients: 15
     }
+  },
+  {
+    id: '9',
+    name: 'Rohit Sharma',
+    email: 'rohit@example.com',
+    type: 'influencer',
+    avatar: 'https://i.pravatar.cc/150?img=3',
+    bio: 'Food blogger and recipe developer. Specializes in Indian cuisine and fusion recipes.',
+    location: 'Delhi, India',
+    categories: ['Food', 'Cooking', 'Lifestyle'],
+    socialLinks: [
+      { platform: 'Instagram', url: 'https://instagram.com/rohitsharma' },
+      { platform: 'YouTube', url: 'https://youtube.com/rohitsharma' },
+      { platform: 'Twitter', url: 'https://twitter.com/rohitsharma' }
+    ],
+    stats: {
+      followers: 90000,
+      engagement: 5.4,
+      projects: 15,
+      clients: 10
+    }
   }
 ];
 
@@ -313,7 +334,7 @@ export const mockInfluencers: Influencer[] = [
     rating: 5.8,
     followers: 150000,
     price: 3000,
-    image: "https://www.pexels.com/photo/woman-wearing-black-and-white-striped-top-2064824/",
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80",
     description: "Tech reviewer and gadget enthusiast. Specializes in smartphone reviews, gaming setups, and tech tutorials.",
     tags: ["tech", "gaming", "reviews", "tutorials"],
     languages: ["English", "Kannada"],

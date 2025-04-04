@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Search, MoreVertical, Check, CheckCheck, MessageSquare, Paperclip, Smile, X, File } from 'lucide-react';
+import { Send, Search, MoreVertical, Check, CheckCheck, MessageSquare, Paperclip, Smile, X } from 'lucide-react';
 import { mockUsers } from '@/services/mockData';
 import { messagingService, Message, Conversation } from '@/services/messagingService';
+import { useNotification } from '@/context/NotificationContext';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './ui/select';
@@ -11,9 +12,11 @@ import Picker from '@emoji-mart/react';
 
 interface MessagingInterfaceProps {
   currentUserId: string;
+  onInitialLoad?: () => void;
 }
 
-const MessagingInterface: React.FC<MessagingInterfaceProps> = ({ currentUserId }) => {
+const MessagingInterface: React.FC<MessagingInterfaceProps> = ({ currentUserId, onInitialLoad }) => {
+  const { showSuccess, showInfo, showError } = useNotification();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -26,6 +29,7 @@ const MessagingInterface: React.FC<MessagingInterfaceProps> = ({ currentUserId }
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const notificationShownRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     // Get current user from mock data (for demo purposes)
@@ -33,8 +37,11 @@ const MessagingInterface: React.FC<MessagingInterfaceProps> = ({ currentUserId }
     if (user) {
       setCurrentUser(user);
       loadConversations(user.id);
+      if (onInitialLoad) {
+        onInitialLoad();
+      }
     }
-  }, []);
+  }, [onInitialLoad]);
 
   useEffect(() => {
     if (selectedConversation && isInitialLoad.current) {
@@ -46,6 +53,23 @@ const MessagingInterface: React.FC<MessagingInterfaceProps> = ({ currentUserId }
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Add effect to check for new messages
+  useEffect(() => {
+    const checkNewMessages = async () => {
+      if (selectedConversation) {
+        const unreadCount = selectedConversation.unreadCount;
+        const notificationKey = `unread-${selectedConversation.id}-${unreadCount}`;
+        
+        if (unreadCount > 0 && !notificationShownRef.current.has(notificationKey)) {
+          showInfo(`You have ${unreadCount} new message${unreadCount > 1 ? 's' : ''} from ${selectedConversation.name}`);
+          notificationShownRef.current.add(notificationKey);
+        }
+      }
+    };
+
+    checkNewMessages();
+  }, [selectedConversation, showInfo]);
 
   const loadConversations = async (conversationId: string) => {
     const convs = await messagingService.getConversations(conversationId);
@@ -65,11 +89,19 @@ const MessagingInterface: React.FC<MessagingInterfaceProps> = ({ currentUserId }
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        showError('File size exceeds 5MB limit');
+        return;
+      }
       setSelectedFile(file);
+      showInfo(`File selected: ${file.name}`);
     }
   };
 
   const handleRemoveFile = () => {
+    if (selectedFile) {
+      showInfo(`Removed file: ${selectedFile.name}`);
+    }
     setSelectedFile(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -88,6 +120,7 @@ const MessagingInterface: React.FC<MessagingInterfaceProps> = ({ currentUserId }
       let messageContent = newMessage.trim();
       if (selectedFile) {
         messageContent += `\n[Attached file: ${selectedFile.name}]`;
+        showInfo(`Attaching file: ${selectedFile.name}`);
       }
 
       // Clear input and file first to prevent duplicate sends
@@ -101,9 +134,11 @@ const MessagingInterface: React.FC<MessagingInterfaceProps> = ({ currentUserId }
         messageContent
       );
       
+      // Show success notification
+      showSuccess('Message sent successfully!');
+
       // Update messages state with the new message
       setMessages(prev => {
-        // Check if the message already exists to prevent duplicates
         const isDuplicate = prev.some(msg => 
           msg.id === message.id || 
           (msg.content === message.content && 
@@ -126,6 +161,7 @@ const MessagingInterface: React.FC<MessagingInterfaceProps> = ({ currentUserId }
       await messagingService.markAsRead(selectedConversation.id, currentUserId);
     } catch (error) {
       console.error('Failed to send message:', error);
+      showError('Failed to send message. Please try again.');
     }
   };
 
@@ -158,36 +194,21 @@ const MessagingInterface: React.FC<MessagingInterfaceProps> = ({ currentUserId }
   };
 
   return (
-    <div className="flex h-[calc(100vh-12rem)] bg-zinc-900 rounded-xl shadow-lg overflow-hidden">
+    <div className="flex h-[calc(100vh-12rem)] bg-gradient-to-br from-purple-50 via-white to-blue-50 rounded-xl shadow-lg overflow-hidden">
       {/* Conversations List */}
-      <div className="w-80 border-r border-zinc-800 bg-zinc-900 overflow-hidden flex flex-col">
+      <div className="w-80 border-r border-purple-100 bg-white/80 backdrop-blur-sm overflow-hidden flex flex-col">
         {/* Search Bar */}
-        <div className="p-4 border-b border-zinc-800">
+        <div className="p-4 border-b border-purple-100">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-purple-400" size={18} />
             <input
               type="text"
               placeholder="Search conversations..."
-              className="w-full pl-10 pr-4 py-2 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 bg-zinc-800 text-white placeholder-gray-400"
+              className="w-full pl-10 pr-4 py-2 border border-purple-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200 text-purple-900 placeholder-purple-400"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-        </div>
-
-        {/* Category Filter */}
-        <div className="px-4 py-3 border-b border-zinc-800">
-          <Select value={selectedCategory || ''} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="w-full bg-zinc-800 border-zinc-700 text-white">
-              <SelectValue placeholder="All categories" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">All categories</SelectItem>
-              {Array.from(new Set(conversations.map(conv => conv.category))).map(category => (
-                <SelectItem key={category} value={category}>{category}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
         </div>
 
         {/* Conversations */}
@@ -198,8 +219,8 @@ const MessagingInterface: React.FC<MessagingInterfaceProps> = ({ currentUserId }
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.2 }}
-              className={`p-4 cursor-pointer hover:bg-zinc-800 transition-colors ${
-                selectedConversation?.id === conversation.id ? 'bg-zinc-800' : ''
+              className={`p-4 cursor-pointer hover:bg-purple-50/50 transition-colors ${
+                selectedConversation?.id === conversation.id ? 'bg-purple-50' : ''
               }`}
               onClick={() => handleConversationSelect(conversation)}
             >
@@ -208,7 +229,7 @@ const MessagingInterface: React.FC<MessagingInterfaceProps> = ({ currentUserId }
                   <img
                     src={conversation.avatar}
                     alt={conversation.name}
-                    className="w-12 h-12 rounded-full object-cover border-2 border-zinc-700"
+                    className="w-12 h-12 rounded-full object-cover border-2 border-purple-100"
                   />
                   {conversation.unreadCount > 0 && (
                     <div className="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
@@ -218,10 +239,10 @@ const MessagingInterface: React.FC<MessagingInterfaceProps> = ({ currentUserId }
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-medium text-white truncate">{conversation.name}</h3>
-                    <span className="text-xs text-gray-400">{conversation.lastMessageTime}</span>
+                    <h3 className="font-medium text-purple-900 truncate">{conversation.name}</h3>
+                    <span className="text-xs text-purple-500">{conversation.lastMessageTime}</span>
                   </div>
-                  <p className="text-sm text-gray-300 truncate">{conversation.lastMessage.content}</p>
+                  <p className="text-sm text-purple-600 truncate">{conversation.lastMessage.content}</p>
                 </div>
               </div>
             </motion.div>
@@ -230,29 +251,29 @@ const MessagingInterface: React.FC<MessagingInterfaceProps> = ({ currentUserId }
       </div>
 
       {/* Chat Area */}
-      <div className="flex-1 flex flex-col bg-zinc-900">
+      <div className="flex-1 flex flex-col bg-white">
         {selectedConversation ? (
           <>
             {/* Chat Header */}
-            <div className="p-4 border-b border-zinc-800 flex items-center justify-between">
+            <div className="p-4 border-b border-purple-100 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <img
                   src={selectedConversation.avatar}
                   alt={selectedConversation.name}
-                  className="w-10 h-10 rounded-full object-cover border-2 border-zinc-700"
+                  className="w-10 h-10 rounded-full object-cover border-2 border-purple-100"
                 />
                 <div>
-                  <h3 className="font-medium text-white">{selectedConversation.name}</h3>
-                  <p className="text-sm text-gray-400">{selectedConversation.category}</p>
+                  <h3 className="font-medium text-purple-900">{selectedConversation.name}</h3>
+                  <p className="text-sm text-purple-500">{selectedConversation.category}</p>
                 </div>
               </div>
-              <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
+              <Button variant="ghost" size="icon" className="text-purple-500 hover:text-purple-600">
                 <MoreVertical size={20} />
               </Button>
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-zinc-900">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-purple-50/50 to-white">
               {messages.map((message) => {
                 const isCurrentUserMessage = message.senderId === currentUserId;
                 return (
@@ -267,7 +288,7 @@ const MessagingInterface: React.FC<MessagingInterfaceProps> = ({ currentUserId }
                       className={`max-w-[70%] rounded-lg p-3 shadow-md ${
                         isCurrentUserMessage
                           ? 'bg-primary text-white rounded-br-none'
-                          : 'bg-zinc-800 text-white rounded-bl-none border border-zinc-700'
+                          : 'bg-white text-purple-900 rounded-bl-none border-2 border-purple-200 shadow-purple-100'
                       }`}
                     >
                       <div className="flex items-center gap-2 mb-1">
@@ -275,16 +296,26 @@ const MessagingInterface: React.FC<MessagingInterfaceProps> = ({ currentUserId }
                           <img
                             src={selectedConversation?.avatar}
                             alt="Sender"
-                            className="w-6 h-6 rounded-full object-cover border border-zinc-700"
+                            className="w-6 h-6 rounded-full object-cover border border-purple-200"
                           />
                         )}
-                        <p className={`text-sm font-medium ${isCurrentUserMessage ? 'text-white' : 'text-white'}`}>
+                        <p className={`text-sm font-medium ${isCurrentUserMessage ? 'text-white' : 'text-purple-900'}`}>
                           {isCurrentUserMessage ? 'You' : selectedConversation?.name}
                         </p>
                       </div>
-                      <p className={`text-sm whitespace-pre-wrap break-words ${isCurrentUserMessage ? 'text-white' : 'text-gray-300'}`}>
+                      <p className={`text-sm whitespace-pre-wrap break-words ${isCurrentUserMessage ? 'text-white' : 'text-purple-800'}`}>
                         {message.content}
                       </p>
+                      <div className="flex items-center gap-1 mt-2">
+                        <span className={`text-xs ${isCurrentUserMessage ? 'text-white/70' : 'text-purple-500'}`}>
+                          {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                        {isCurrentUserMessage && (
+                          <span className="text-xs text-white/70">
+                            {message.read ? <CheckCheck size={12} /> : <Check size={12} />}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </motion.div>
                 );
@@ -293,73 +324,104 @@ const MessagingInterface: React.FC<MessagingInterfaceProps> = ({ currentUserId }
             </div>
 
             {/* Message Input */}
-            <div className="p-4 border-t border-zinc-800">
-              <form onSubmit={handleSubmit} className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="text-gray-400 hover:text-white"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <Paperclip size={20} />
-                </Button>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  className="hidden"
-                  onChange={handleFileSelect}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="text-gray-400 hover:text-white"
-                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                >
-                  <Smile size={20} />
-                </Button>
+            <div className="p-4 border-t border-purple-100 bg-white/80 backdrop-blur-sm">
+              {selectedFile && (
+                <div className="mb-2 flex items-center gap-2 bg-purple-50 p-2 rounded-lg border border-purple-200">
+                  <Paperclip className="text-purple-500" size={16} />
+                  <span className="text-sm text-purple-900 truncate flex-1">{selectedFile.name}</span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 text-purple-500 hover:text-purple-600 hover:bg-purple-100 rounded-full"
+                    onClick={handleRemoveFile}
+                  >
+                    <X size={14} />
+                  </Button>
+                </div>
+              )}
+              <form onSubmit={handleSubmit} className="flex items-end gap-2">
                 <div className="relative flex-1">
-                  <Input
-                    type="text"
+                  <div className="absolute left-3 bottom-3 flex items-center gap-2 z-10">
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleFileSelect}
+                      className="hidden"
+                      accept="image/*,.pdf,.doc,.docx,.txt"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-purple-500 hover:text-purple-600 hover:bg-purple-100 rounded-full border border-purple-200 bg-white"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <Paperclip size={18} />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-purple-500 hover:text-purple-600 hover:bg-purple-100 rounded-full border border-purple-200 bg-white"
+                      onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                    >
+                      <Smile size={18} />
+                    </Button>
+                  </div>
+                  <textarea
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Type a message..."
-                    className="bg-zinc-800 border-zinc-700 text-white placeholder-gray-400"
+                    placeholder="Type your message..."
+                    rows={1}
+                    className="w-full pl-28 pr-4 py-3 border border-purple-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-200 text-purple-900 placeholder-purple-400 resize-none min-h-[48px] max-h-32 bg-white/80 backdrop-blur-sm"
                   />
-                  {selectedFile && (
-                    <div className="absolute -top-8 left-0 right-0 flex items-center gap-2 bg-zinc-800 p-2 rounded-lg border border-zinc-700">
-                      <File size={16} className="text-gray-400" />
-                      <span className="text-sm text-gray-300">{selectedFile.name}</span>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6 text-gray-400 hover:text-white"
-                        onClick={handleRemoveFile}
-                      >
-                        <X size={16} />
-                      </Button>
+                  {showEmojiPicker && (
+                    <div className="absolute bottom-full left-0 mb-2 z-50">
+                      <div className="bg-white rounded-lg shadow-lg border border-purple-200 p-2">
+                        <div className="flex justify-end mb-2">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 text-purple-500 hover:text-purple-600"
+                            onClick={() => setShowEmojiPicker(false)}
+                          >
+                            <X size={14} />
+                          </Button>
+                        </div>
+                        <div className="max-h-[300px] overflow-y-auto">
+                          <Picker
+                            data={data}
+                            onEmojiSelect={handleEmojiSelect}
+                            theme="light"
+                            previewPosition="none"
+                            skinTonePosition="none"
+                            searchPosition="none"
+                            navPosition="none"
+                            perLine={8}
+                            emojiSize={20}
+                            emojiButtonSize={28}
+                          />
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
-                <Button type="submit" size="icon" className="bg-primary hover:bg-primary/90">
-                  <Send size={20} className="text-white" />
+                <Button 
+                  type="submit" 
+                  className="bg-primary hover:bg-primary/90 text-white h-12 w-12 rounded-full flex items-center justify-center shadow-sm"
+                >
+                  <Send size={20} />
                 </Button>
               </form>
-              {showEmojiPicker && (
-                <div className="absolute bottom-20 right-4">
-                  <Picker data={data} onEmojiSelect={handleEmojiSelect} theme="dark" />
-                </div>
-              )}
             </div>
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
-              <MessageSquare className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-white mb-2">Select a conversation</h3>
-              <p className="text-gray-400">Choose a conversation from the list to start messaging</p>
+              <MessageSquare className="w-12 h-12 text-purple-300 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-purple-900 mb-2">Select a conversation</h3>
+              <p className="text-purple-500">Choose a conversation from the list to start messaging</p>
             </div>
           </div>
         )}

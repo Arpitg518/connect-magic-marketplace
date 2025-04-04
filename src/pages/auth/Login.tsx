@@ -7,9 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-
 const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
@@ -55,8 +52,6 @@ const Login: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-zinc-900">
-      <Header />
-      
       <main className="flex-grow flex items-center justify-center py-16 px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -204,8 +199,6 @@ const Login: React.FC = () => {
           </div>
         </motion.div>
       </main>
-      
-      <Footer />
     </div>
   );
 };

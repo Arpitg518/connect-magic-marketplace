@@ -1,75 +1,69 @@
-# Connect Magic Marketplace
+# Welcome to your Lovable project
 
-A modern platform connecting influencers with businesses for collaboration opportunities.
+## Project info
 
-## Features
+**URL**: https://lovable.dev/projects/8c71c86e-4fa1-4df5-8554-4b314d76f6af
 
-- Influencer Discovery
-- Business Profiles
-- AI-Powered Matchmaking
-- Real-time Messaging
-- Campaign Management
-- Analytics Dashboard
+## How can I edit this code?
 
-## Tech Stack
+There are several ways of editing your application.
 
-- React
-- TypeScript
-- Tailwind CSS
-- Framer Motion
-- Vite
-- Shadcn UI
+**Use Lovable**
 
-## Getting Started
+Simply visit the [Lovable Project](https://lovable.dev/projects/8c71c86e-4fa1-4df5-8554-4b314d76f6af) and start prompting.
 
-### Prerequisites
+Changes made via Lovable will be committed automatically to this repo.
 
-- Node.js (v16 or higher)
-- npm or yarn
+**Use your preferred IDE**
 
-### Installation
+If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
 
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/connect-magic-marketplace.git
-cd connect-magic-marketplace
-```
+The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-2. Install dependencies:
-```bash
-npm install
-# or
-yarn install
-```
+Follow these steps:
 
-3. Start the development server:
-```bash
+```sh
+# Step 1: Clone the repository using the project's Git URL.
+git clone <YOUR_GIT_URL>
+
+# Step 2: Navigate to the project directory.
+cd <YOUR_PROJECT_NAME>
+
+# Step 3: Install the necessary dependencies.
+npm i
+
+# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
-# or
-yarn dev
 ```
 
-4. Open [http://localhost:5173](http://localhost:5173) in your browser.
+**Edit a file directly in GitHub**
 
-## Project Structure
+- Navigate to the desired file(s).
+- Click the "Edit" button (pencil icon) at the top right of the file view.
+- Make your changes and commit the changes.
 
-```
-src/
-├── components/     # Reusable UI components
-├── pages/         # Page components
-├── services/      # API and service functions
-├── styles/        # Global styles
-└── utils/         # Utility functions
-```
+**Use GitHub Codespaces**
 
-## Contributing
+- Navigate to the main page of your repository.
+- Click on the "Code" button (green button) near the top right.
+- Select the "Codespaces" tab.
+- Click on "New codespace" to launch a new Codespace environment.
+- Edit files directly within the Codespace and commit and push your changes once you're done.
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+## What technologies are used for this project?
 
-## License
+This project is built with .
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
+
+## How can I deploy this project?
+
+Simply open [Lovable](https://lovable.dev/projects/8c71c86e-4fa1-4df5-8554-4b314d76f6af) and click on Share -> Publish.
+
+## I want to use a custom domain - is that possible?
+
+We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)

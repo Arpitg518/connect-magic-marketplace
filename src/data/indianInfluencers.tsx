@@ -1,4 +1,3 @@
-
 import { Instagram, Youtube, Twitter } from 'lucide-react';
 import React from 'react';
 
@@ -164,6 +163,48 @@ export const indianInfluencers = [
     tags: ['luxury', 'fashion', 'lifestyle'],
     bio: 'Global fashion icon and entrepreneur advocating for diversity in the fashion industry',
     verified: true
+  },
+  {
+    id: 8,
+    name: 'Mike Chen',
+    profileImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
+    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
+    category: 'Technology',
+    followers: 150000,
+    engagement: 5.8,
+    city: 'Bangalore',
+    coordinates: { lat: 12.9716, lng: 77.5946 },
+    socialLinks: {
+      instagram: 'https://instagram.com/mikechen',
+      youtube: 'https://youtube.com/mikechen',
+      twitter: 'https://twitter.com/mikechen'
+    },
+    platform: 'YouTube',
+    platformIcon: <Youtube size={12} className="mr-1" />,
+    tags: ['tech', 'gaming', 'reviews', 'tutorials'],
+    bio: 'Tech reviewer and gadget enthusiast. Specializes in smartphone reviews, gaming setups, and tech tutorials.',
+    verified: true
+  },
+  {
+    id: 9,
+    name: 'Rohit Sharma',
+    profileImage: 'https://i.pravatar.cc/150?img=3',
+    image: 'https://i.pravatar.cc/150?img=3',
+    category: 'Food',
+    followers: 90000,
+    engagement: 5.4,
+    city: 'Delhi',
+    coordinates: { lat: 28.6139, lng: 77.2090 },
+    socialLinks: {
+      instagram: 'https://instagram.com/rohitsharma',
+      youtube: 'https://youtube.com/rohitsharma',
+      twitter: 'https://twitter.com/rohitsharma'
+    },
+    platform: 'Instagram',
+    platformIcon: <Instagram size={12} className="mr-1" />,
+    tags: ['food', 'cooking', 'recipes', 'indian-cuisine'],
+    bio: 'Food blogger and recipe developer. Specializes in Indian cuisine and fusion recipes.',
+    verified: false
   }
 ];
 
